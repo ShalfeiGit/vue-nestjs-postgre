@@ -1,0 +1,15 @@
+﻿version: '3.9'
+
+services:
+  postgres:
+    restart: always
+    image: postgres:16.2
+    environment:
+      POSTGRES_DB: dbVue
+      POSTGRES_USER: dbUser
+      POSTGRES_PASSWORD: dbPassword
+    ports:
+      - "5433:5432"
+    volumes:
+    - ./postgres-data:/var/lib/postgresql/data
+      

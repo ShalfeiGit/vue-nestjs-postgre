@@ -1,0 +1,28 @@
+﻿@import '@app/app.scss';
+
+.popular-tags {
+  background-color: $grey-color;
+  margin-right: 40px;
+  border-radius: 20px;
+  margin-top: 20px;
+  &__header{
+    display: flex;
+    margin-left: 25px;
+  }
+  &__content{
+    display: flex;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  &__tag{
+    background-color: $dark-grey-color;
+    padding: 3px;
+    border-radius: 15px;
+    padding-bottom: 8px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+}
