@@ -1,5 +1,7 @@
 ﻿<template >
-  <div>Hello World</div>
+  <router-link to="/home">Go to Home</router-link>
+  <router-view></router-view>
+  {{this.$store.state.count}}
 </template>
 
 <script >

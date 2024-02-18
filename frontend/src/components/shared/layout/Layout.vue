@@ -1,4 +1,17 @@
-﻿import React from 'react'
+﻿<template >
+  <div>Layout</div>
+	<router-view></router-view>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+<!-- import React from 'react'
 import { message } from 'antd'
 import { Outlet } from 'react-router-dom'
 
@@ -24,4 +37,4 @@ const Layout: React.FC = () =>{
 	)
 } 
 
-export default Layout
+export default Layout -->

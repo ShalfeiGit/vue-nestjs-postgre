@@ -1,4 +1,17 @@
-import React, { useEffect, useState }from 'react'
+<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+<!-- import React, { useEffect, useState }from 'react'
 import { useSelector } from 'react-redux'
 import { Form, Input, Button, Typography, InputNumber, Select, Flex, Popconfirm, Upload, UploadFile, Modal } from 'antd'
 import { useOutletContext, useNavigate, useParams } from 'react-router-dom'
@@ -314,4 +327,4 @@ const UserContent: React.FC = () => {
 	)
 }
 
-export default UserContent
+export default UserContent -->

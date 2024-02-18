@@ -1,4 +1,18 @@
-﻿import React, { useEffect } from 'react'
+﻿<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+
+<!-- import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button, Typography } from 'antd'
@@ -58,4 +72,4 @@ const PopularTags: React.FC<IPopularTags> = ({page, limit}) => {
 	)
 }
 
-export default PopularTags
+export default PopularTags -->

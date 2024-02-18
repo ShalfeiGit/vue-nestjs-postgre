@@ -1,11 +1,24 @@
-﻿import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { Form, Input, Button, Typography } from 'antd'
-import { useOutletContext, useNavigate } from 'react-router-dom'
+﻿<template >
+  <div>Hello World</div>
+</template>
 
-import '@app/pages/signUp/signUp.scss'
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+<!-- import React from 'react'
+import { NavLink, useNavigate, useOutletContext } from 'react-router-dom'
+import { Form, Input, Button, Typography, Checkbox } from 'antd'
+
+
+import '@app/pages/signIn/signIn.scss'
 import { useAppDispatch } from '@app/store/store'
-import { signUpAction } from '@app/store/slices/userInfo'
+import { signInAction } from '@app/store/slices/userInfo'
 
 const { Title } = Typography
 
@@ -33,15 +46,15 @@ const tailFormItemLayout = {
 	}
 }
 
-const SignUp: React.FC = () => {
+const Signin: React.FC = () => {
 	const dispatch = useAppDispatch()
-	const openNotification = useOutletContext()
-	const [form] = Form.useForm()
 	const navigate = useNavigate()
+	const [form] = Form.useForm()
+	const openNotification = useOutletContext()
 	const handleSubmitForm = () => {
 		form.validateFields().then((values) => {
-			const {repeatPass, ...data} = values
-			dispatch(signUpAction({...data, openNotification, navigate }))
+			const {...data} = values
+			dispatch(signInAction({...data, openNotification, navigate }))
 		})
 	}
 
@@ -54,19 +67,6 @@ const SignUp: React.FC = () => {
 		}
 		if(value.search(/^[a-zA-Z0-9]+$/)){
 			return Promise.reject(new Error('Incorrect login. Use characters a-z, A-Z, 0-9'))
-		}
-		return Promise.resolve()
-	}
-
-	const handleEmailValidator = (rule: { required: boolean }, value: string) => {
-		if(rule?.required && (!value || !value.trim())){
-			return Promise.reject(new Error('Field must not be empty'))
-		}
-		if(value.length < 6){
-			return Promise.reject(new Error('Email length must be longer than 6 characters'))
-		}
-		if(value.search(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)){
-			return Promise.reject(new Error('Incorrect email. Example correct email: test@gmail.com'))
 		}
 		return Promise.resolve()
 	}
@@ -84,25 +84,15 @@ const SignUp: React.FC = () => {
 		return Promise.resolve()
 	}
 
-	const handleRepeatPasswordValidator = (rule: { required: boolean }, value: string) => {
-		if(rule?.required && (!value || !value.trim())){
-			return Promise.reject(new Error('Field must not be empty'))
-		}
-		if(form.getFieldValue('pass') !== value){
-			return Promise.reject(new Error('Password fields must be the same'))
-		}
-		return Promise.resolve()
-	}
-
 	return (
-		<div className="signup">
-			<Title className={'signup__text'}>Sign Up</Title>
-			<NavLink to={'/signin'} className={'signin__link-title'}>
-				Have an account?
+		<div className="signin">
+			<Title className={'signin__text'}>Sign In</Title>
+			<NavLink to={'/signup'} className={'signin__link-title'}>
+				Need an account?
 			</NavLink>
 			<Form
 				form={form}
-				name="signup"
+				name="signin"
 				{...formItemLayout}
 				initialValues={{ remember: true }}
 				onFinish={handleSubmitForm}
@@ -120,16 +110,6 @@ const SignUp: React.FC = () => {
 
 				<Form.Item 
 					hasFeedback
-					label="Email" 
-					name="email" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator:handleEmailValidator }]}
-				>
-					<Input placeholder="Input email" />
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
 					label="Pass" 
 					name="pass" 
 					validateDebounce={1000}
@@ -140,12 +120,11 @@ const SignUp: React.FC = () => {
 
 				<Form.Item 
 					hasFeedback
-					label="Repeat password" 
-					name="repeatPass"
-					validateDebounce={1000}
-					rules={[{ required: true, validator: handleRepeatPasswordValidator }]}
+					name="remember" 
+					label="Remember me" 
+					valuePropName="checked"
 				>
-					<Input.Password placeholder="Input password" autoComplete='on'/>
+					<Checkbox/>
 				</Form.Item>
 
 				<Form.Item {...tailFormItemLayout}>
@@ -158,4 +137,4 @@ const SignUp: React.FC = () => {
 	)
 }
 
-export default SignUp
+export default Signin -->

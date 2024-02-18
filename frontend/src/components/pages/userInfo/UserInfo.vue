@@ -1,4 +1,18 @@
-﻿import React, { useEffect, useState }from 'react'
+﻿<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+
+<!-- import React, { useEffect, useState }from 'react'
 import { useSelector } from 'react-redux'
 import { Input, Typography, Tabs, TabsProps } from 'antd'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -84,4 +98,4 @@ const UserInfo: React.FC = () => {
 	)
 }
 
-export default UserInfo
+export default UserInfo -->

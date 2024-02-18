@@ -1,4 +1,17 @@
-﻿// import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons'
+﻿<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+<!-- // import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -116,4 +129,4 @@ const FeedArticles: React.FC<IProps> = ({feedArticles, pagination, tag}) => {
 		</div>
 	)}
 
-export default FeedArticles
+export default FeedArticles -->

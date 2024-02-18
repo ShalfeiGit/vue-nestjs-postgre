@@ -1,4 +1,17 @@
-import React, {useEffect} from 'react'
+<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+<!-- import React, {useEffect} from 'react'
 import { Button, Popconfirm, Table, Pagination } from 'antd'
 import { EditOutlined, CloseOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
@@ -141,4 +154,4 @@ const ArticleContent: React.FC<IProps> = (props) => {
 	)
 } 
 
-export default ArticleContent
+export default ArticleContent -->

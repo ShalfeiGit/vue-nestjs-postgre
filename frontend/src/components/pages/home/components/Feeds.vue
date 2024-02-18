@@ -1,4 +1,18 @@
-﻿import React, {useEffect, useState} from 'react'
+﻿<template >
+  <div>Hello World</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+
+<!-- import React, {useEffect, useState} from 'react'
 import moment from 'moment'
 import { Tabs } from 'antd'
 import { useNavigate } from 'react-router-dom'
@@ -79,4 +93,4 @@ const Feeds: React.FC = () => {
 }
 
 export default Feeds
-
+ -->

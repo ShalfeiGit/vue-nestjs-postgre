@@ -1,4 +1,17 @@
-﻿import React from 'react'
+﻿<template >
+  <div>Home</div>
+</template>
+
+<script >
+  export default {
+  }
+</script>
+
+<style>
+</style>
+
+
+<!-- import React from 'react'
 import { Col, Row, Typography } from 'antd'
 
 import '@app/pages/home/home.scss'
@@ -32,4 +45,4 @@ const Home: React.FC = () => {
 	)
 }
 
-export default Home
+export default Home -->
