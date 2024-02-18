@@ -19,7 +19,11 @@ async function bootstrap() {
     res.locals.csrfToken = token;
     next();
   });
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    }),
+  );
   app.setGlobalPrefix('api');
   await app.listen(3000);
 }

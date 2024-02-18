@@ -1,38 +1,35 @@
 ﻿const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const { VueLoaderPlugin } = require('vue-loader')
 const path = require('path')
 
 module.exports = {
 	mode: process.env.NODE_ENV,
 	entry: {
-		main: './src/index.tsx',
-		vendor: './src/vendor/vendor.tsx'
+		main: './src/index.ts',
 	},
 	module: {
 		rules: [
 			{
-				test: /\.(js|jsx|tsx|ts)$/,
+				test: /\.(js|ts)$/,
 				exclude: /node_modules/,
 				loader: 'babel-loader'
 			},
 			{
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+			{
         test: /\.svg$/,
         use: [
-          {
-            loader: "babel-loader"
-          },
-          {
-            loader: "react-svg-loader",
-            options: {
-              jsx: true // true outputs JSX tags
-            }
-          }
-        ]
+          'babel-loader',
+          'vue-svg-loader',
+        ],
       },
 			{
 				test: /\.s[ac]ss$/i,
 				use: [
-					process.env.NODE_ENV !== 'production' ? 'style-loader' : MiniCssExtractPlugin.loader,
+					process.env.NODE_ENV !== 'production' ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
 					'css-loader',
 					'sass-loader'
 				]
@@ -51,7 +48,7 @@ module.exports = {
 		alias: {
 			'@app': path.resolve(__dirname, './src/components')
 		},
-		extensions: ['*', '.js', '.jsx', '.tsx', '.ts']
+		extensions: ['*', '.js', '.ts']
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
@@ -60,7 +57,8 @@ module.exports = {
 		}),
 		new MiniCssExtractPlugin({
 			filename: '[name].css'
-		})
+		}),
+		new VueLoaderPlugin(),
 	],
 	optimization: {
 		removeAvailableModules: true,
