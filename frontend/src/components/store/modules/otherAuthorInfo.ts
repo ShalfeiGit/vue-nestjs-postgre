@@ -1,6 +1,7 @@
-﻿import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import type { IAxiosResponse, IInitialState, IThunkApi } from '@app/store/store'
+﻿import type { IAxiosResponse, IInitialState } from '@app/store/store'
+import api from '@app/api/api'
 import { INavigateAction, INotificationAction } from '@app/shared/layout/types'
+import { IUserInfo } from '@app/store/modules/userInfo'
 
 export interface IOtherAuthorInfo {
 	username: string;
@@ -11,58 +12,53 @@ export interface IOtherAuthorInfo {
 	avatarUrl: string;
 }
 
-const initialState: IInitialState<IOtherAuthorInfo> = {
-	data: null,
-	error: null,
-	loading: false,
-	status: null,
-	statusText: null,
-	headers: null,
-	config: null,
+const moduleOtherAuthorInfo = {
+	namespaced: true,
+	state: (): IInitialState<IOtherAuthorInfo> => ({
+		data: null,
+		error: null,
+		loading: false,
+		status: null,
+		statusText: null,
+		headers: null,
+		config: null,
+	}),
+	mutations: { 
+		getOtherAuthorInfoAction_pending (state) {
+			state.loading = true
+		},
+		getOtherAuthorInfoAction_fulfilled (state, payload) {
+			const {data, status, statusText, headers, config}  = <IAxiosResponse<IOtherAuthorInfo>>payload ?? {}
+			state.data = data
+			state.error = null
+			state.status = status
+			state.statusText = statusText
+			state.headers = headers
+			state.config = config
+			state.loading = false
+		},
+		getOtherAuthorInfoAction_rejected (state, payload) {
+			const {data, status, statusText, headers, config}  = <IAxiosResponse<IOtherAuthorInfo>>payload ?? {}
+			state.data = null
+			state.error = data as unknown as string
+			state.status = status
+			state.statusText = statusText
+			state.headers = headers
+			state.config = config 
+			state.loading = false
+		}, 
+	},
+	actions: {
+		async updateUserInfoAction({ commit, dispatch }, payload: Pick<IOtherAuthorInfo, 'username'> & INotificationAction & INavigateAction){
+			const { username } = payload	
+			const response: IAxiosResponse<IUserInfo> = await api({ method: 'get', url: `user/author/${username}` })
+			if(response.status >= 400){
+				return commit('getOtherAuthorInfoAction_rejected', response)
+			}	
+			return commit('getOtherAuthorInfoAction_fulfilled', response)
+		}
+	},
+	// getters: { ... }
 }
 
-export const getOtherAuthorInfoAction = createAsyncThunk(
-	'othersUserInfo/getOtherAuthorInfo',
-	async (data: Pick<IOtherAuthorInfo, 'username'> & INotificationAction & INavigateAction, thunkAPI: IThunkApi<IAxiosResponse<IOtherAuthorInfo>>) => {
-		const { username } = data
-		const response = await thunkAPI.extra.api({ method: 'get', url: `user/author/${username}` })
-		if(response.status >= 400){
-			return thunkAPI.rejectWithValue(response) as unknown as IAxiosResponse<string>
-		}	
-		return response
-	}
-)
-
-export const othersUserInfoSlice = createSlice({
-	name: 'otherAuthorInfo',
-	initialState,
-	reducers: {},
-	extraReducers: (builder) => {
-		builder
-			.addCase(getOtherAuthorInfoAction.pending, state => {
-				state.loading = true
-			})
-			.addCase(getOtherAuthorInfoAction.fulfilled, (state, action) => {
-				const {data, status, statusText, headers, config}  = <IAxiosResponse<IOtherAuthorInfo>>action?.payload ?? {}
-				state.data = data
-				state.error = null
-				state.status = status
-				state.statusText = statusText
-				state.headers = headers
-				state.config = config
-				state.loading = false
-			})
-			.addCase(getOtherAuthorInfoAction.rejected, (state, action)  => {
-				const {data, status, statusText, headers, config}  = <IAxiosResponse<IOtherAuthorInfo>>action?.payload ?? {}
-				state.data = null
-				state.error = data as unknown as string
-				state.status = status
-				state.statusText = statusText
-				state.headers = headers
-				state.config = config 
-				state.loading = false
-			})
-	}
-})
-
-export default othersUserInfoSlice.reducer
+export default moduleOtherAuthorInfo
