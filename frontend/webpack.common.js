@@ -27,6 +27,13 @@ module.exports = {
         ],
       },
 			{
+				test: /\.css$/i,
+				use: [
+					process.env.NODE_ENV !== 'production' ? 'style-loader' : MiniCssExtractPlugin.loader,
+					'css-loader',
+				]
+			},
+			{
 				test: /\.s[ac]ss$/i,
 				use: [
 					process.env.NODE_ENV !== 'production' ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
@@ -34,6 +41,7 @@ module.exports = {
 					'sass-loader'
 				]
 			},
+
 			{
 				test: /\.(png|jpg|jpeg|gif)$/i,
 				type: 'asset/resource'
