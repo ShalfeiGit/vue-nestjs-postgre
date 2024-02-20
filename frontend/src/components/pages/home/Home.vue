@@ -1,48 +1,59 @@
 ﻿<template >
-  <div>Home</div>
+	<div className="home">
+		<div className="home__explanation">
+			<div className="home__title">
+				<a-typography-text>React-Nestjs-MySQL Startup</a-typography-text>
+			</div>
+			<div className="home__content">
+				<a-typography-text>A place to share your knowledge.</a-typography-text>
+			</div>
+		</div>
+		<a-row :justify="end">
+			<a-col :span="1"></a-col>
+			<a-col :span="16">Feeds</a-col>
+			<a-col :span="1"></a-col>
+			<a-col :span="6">PopularTags</a-col>
+		</a-row>
+		<a-row :justify="end">
+			<a-col :span="24"><a-footer></a-footer></a-col>
+		</a-row>
+	</div>
 </template>
 
 <script >
+	import { Typography, Row, Col } from 'ant-design-vue';
+	import Footer from '@app/shared/footer/Footer.vue';
   export default {
+		components: {
+      ATypography: Typography,
+      ARow: Row,
+      ACol: Col,
+      AFooter: Footer,
+    },
   }
 </script>
 
-<style>
+<style lang="scss">
+	@import '@app/App.scss';
+
+	.home {
+		&__explanation{
+			background-color: $blue-color;
+			padding-top: 40px;
+			padding-bottom: 40px;
+		}
+		&__title .ant-typography{
+			display: flex;
+			justify-content: center;
+			font-size: 48px;
+			font-weight: bold;
+			color: $white-color;
+		}
+		&__content, &__content .ant-typography{
+			display: flex;
+			justify-content: center;
+			font-size: 28px;
+			color: $white-color;
+		}
+	}
 </style>
-
-
-<!-- import React from 'react'
-import { Col, Row, Typography } from 'antd'
-
-import '@app/pages/home/home.scss'
-import Feeds from './components/Feeds'
-import PopularTags from './components/PopularTags'
-import Footer from '@app/shared/footer/Footer'
-
-const { Text } = Typography
-
-const Home: React.FC = () => {
-	return (
-		<div className="home">
-			<div className="home__explanation">
-				<div className="home__title">
-					<Text>React-Nestjs-MySQL Startup</Text>
-				</div>
-				<div className="home__content">
-					<Text>A place to share your knowledge.</Text>
-				</div>
-			</div>
-			<Row justify="end">
-				<Col span={1}></Col>
-				<Col span={16}><Feeds/></Col>
-				<Col span={1}></Col>
-				<Col span={6}><PopularTags page={1} limit={10}/></Col>
-			</Row>
-			<Row justify="end">
-				<Col span={24}><Footer /></Col>
-			</Row>
-		</div>
-	)
-}
-
-export default Home -->
