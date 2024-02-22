@@ -2,7 +2,7 @@
 	<div className="home">
 		<div className="home__explanation">
 			<div className="home__title">
-				<a-typography-text>React-Nestjs-MySQL Startup</a-typography-text>
+				<a-typography-text>Vue-Nestjs-PostgreSQL Startup</a-typography-text>
 			</div>
 			<div className="home__content">
 				<a-typography-text>A place to share your knowledge.</a-typography-text>
@@ -14,23 +14,14 @@
 			<a-col :span="1"></a-col>
 			<a-col :span="6">PopularTags</a-col>
 		</a-row>
-		<a-row :justify="end">
-			<a-col :span="24"><a-footer></a-footer></a-col>
+		<a-row :justify="end" class="home__footer">
+			<a-col :span="24"><app-footer></app-footer></a-col>
 		</a-row>
 	</div>
 </template>
 
-<script >
-	import { Typography, Row, Col } from 'ant-design-vue';
-	import Footer from '@app/shared/footer/Footer.vue';
-  export default {
-		components: {
-      ATypography: Typography,
-      ARow: Row,
-      ACol: Col,
-      AFooter: Footer,
-    },
-  }
+<script setup >
+	import AppFooter from '@app/shared/footer/Footer.vue';
 </script>
 
 <style lang="scss">

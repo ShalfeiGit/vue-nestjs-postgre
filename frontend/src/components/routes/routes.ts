@@ -17,42 +17,52 @@ const router = createRouter({
 			component: Layout,
 			children: [
 				{
+					name: 'home',
 					path: '',
 					component: Home,
 				},
 				{
+					name: 'showArticle',
 					path: 'article/:id',
 					component: Article
 				},
 				{
+					name: 'preview',
 					path: 'preview/:id',
 					component: PreviewArticle
 				},
 				{
-					path: 'signin',
+					name:'signin',
+					path:'signin',
 					component: SignIn
 				},
 				{
-					path: 'signup',
+					name:'signup',
+					path:'signup',
 					component: SingUp
 				},
 				{
+					name: 'editArticle',
 					path: 'article/edit/:slug',
 					component: Article
 				},
 				{
+					name: 'previewArticle',
 					path: 'article/preview/:slug',
 					component: PreviewArticle
 				},
 				{
+					name: 'createArticle',
 					path: 'article/create',
 					component: Article
 				},
 				{
+					name: 'userInfo',
 					path: 'userinfo/:username',
 					component: UserInfo
 				},
 				{ 
+					name: 'error',
 					path: '/:pathMatch(.*)*',
 					component: ErrorPage
 				}

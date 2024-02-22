@@ -22,7 +22,7 @@ module.exports = {
 			{
         test: /\.svg$/,
         use: [
-          'babel-loader',
+          'vue-loader',
           'vue-svg-loader',
         ],
       },

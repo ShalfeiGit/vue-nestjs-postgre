@@ -2,27 +2,17 @@
 	<div className="footer">
 		<div className="footer__wrapper">
 			<a-typography-text className="footer__text">Copyright &copy;{{year}} Designed by Valentin Zadorozhniy{{' '}}</a-typography-text>
-			<a href="https://t.me/Shalfei"><a-message :style="{ color: '#ffffff' }"/></a>	
-	  </div>
+			<a href="https://t.me/Shalfei"><a-logo class="footer__icon"></a-logo></a>
+		</div>
 	</div>
 </template>
 
-<script >
-	import { Typography } from 'ant-design-vue';
-	import Icon, { SendOutlined } from '@ant-design/icons-vue';
+<script setup >
 	import moment from 'moment'
-  export default {
-		components: {
-      ATypography: Typography,
-      AIcon: Icon,
-			AMessage: SendOutlined
-    },
-		computed: {
-			year(){
-				return moment().year()
-			},
-		}
-  }
+	import ALogo from '@app/shared/footer/svg/telegramm.svg';
+	import { computed } from 'vue';
+
+	const year = computed(() => moment().year())
 </script>
 
 <style lang="scss">
@@ -38,12 +28,15 @@
 		align-content: center;
 		&__wrapper{
 			align-self: center;
+			display: flex;
 		}
 		&__text{
 			color: $white-color;
 		}
 		&__icon{
-			color: $white-color;
+			margin-left: 5px;
+			height: 19px;
+			width: 15px;
 		}
 	}
 </style>

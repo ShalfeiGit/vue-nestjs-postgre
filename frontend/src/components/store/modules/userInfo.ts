@@ -175,24 +175,24 @@ const moduleUserInfo = {
 
 		async signInAction({ commit, dispatch }, payload: ISignIn & INotificationAction & INavigateAction){
 			const { openNotification, navigate, ...userInfo} = payload
-			const callNotification = ({type, message}: ICallNotificationAction ) => {
-				openNotification({
-					content: message,
-					type
-				})
-			}
+			// const callNotification = ({type, message}: ICallNotificationAction ) => {
+			// 	openNotification({
+			// 		content: message,
+			// 		type
+			// 	})
+			// }
 			const response = await api({ method: 'post', url: 'auth', data: userInfo })
-			if(response.status >= 400){
-				callNotification({
-					type: 'error',
-					message: response.data.message
-				})
-				return commit('signInAction_rejected', response) 
-			}	else {
-				if(navigate){
-					navigate('/')
-				}
-			}
+			// if(response.status >= 400){
+			// 	callNotification({
+			// 		type: 'error',
+			// 		message: response.data.message
+			// 	})
+			// 	return commit('signInAction_rejected', response) 
+			// }	else {
+			// 	if(navigate){
+			// 		navigate('/si')
+			// 	}
+			// }
 			if(response?.data?.refresh_token){
 				localStorage.setItem('refresh_token', response.data.refresh_token)
 			}
@@ -243,6 +243,10 @@ const moduleUserInfo = {
 			return commit('likeArticleByUserAction_fulfilled', user)
  		},
 	},
-	// getters: { ... }
+	getters: { 
+		getUserInfo: (state) => {
+			return state?.data
+		}
+	}
 }
 export default moduleUserInfo
