@@ -32,13 +32,13 @@ const router = createRouter({
 					component: PreviewArticle
 				},
 				{
-					name:'signin',
-					path:'signin',
+					name:'signIn',
+					path:'signIn',
 					component: SignIn
 				},
 				{
-					name:'signup',
-					path:'signup',
+					name:'signUp',
+					path:'signUp',
 					component: SingUp
 				},
 				{

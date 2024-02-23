@@ -13,9 +13,9 @@
 			<a-col :span="3"></a-col>
 			<a-col :span="9" class="menu__login">
 				<div v-if="userInfo">
-					<a-button class="menu__button" type="link" title="User info" @click="handleRedirectUserInfoModal(userInfo?.username)">
+					<a-button class="menu__button" type="link" title="User info" @click="handleRedirectUserInfoModal(userInfo.username)">
 						<a-avatar :src="avatarSrc" 
-						/><span class="menu__greetings">{{`Hi, ${userInfo?.username}`}}</span>
+						/><span class="menu__greetings">{{`Hi, ${userInfo.username}`}}</span>
 					</a-button>
 				</div>
 				<div v-else>
@@ -28,22 +28,26 @@
 	</div>
 </template>
 
-<script setup >
+<script setup lang="ts">
 	import { LoginOutlined as AppLoginOutlined, RocketTwoTone as AppRocketTwoTone } from '@ant-design/icons-vue';
-	import {computed, onMounted, defineProps, ref } from 'vue';
+	import {computed, onMounted, defineProps } from 'vue';
 	import { useRouter } from 'vue-router'
 	import { useStore } from 'vuex'
 
-	const props = defineProps({
-		openNotification: Function
-	});
+	import { INotification, IUserInfo } from '@app/store/modules/userInfo'
+
+	interface IProps {
+		openNotification(data: INotification): void
+	}
+
+	const props = defineProps<IProps>();
 	const store = useStore()
 	const router = useRouter()
 
-	const userInfo = computed(() => store.getters["userInfo/getUserInfo"])
-	const avatarSrc = computed(() => userInfo?.avatarUrl 
-		? `http://localhost:3000${userInfo?.avatarUrl}` 
-		: `https://api.dicebear.com/7.x/miniavs/svg?seed=${userInfo?.id}`
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
+	const avatarSrc = computed<string>(() => userInfo.value.avatarUrl 
+		? `http://localhost:3000${userInfo.value.avatarUrl}` 
+		: `https://api.dicebear.com/7.x/miniavs/svg?seed=${userInfo.value.id}`
 	)
 
 	const handleRedirectHome = () => {
@@ -53,10 +57,10 @@
 	}
 	const handleRedirectSignInModal = () => {
 		router.push({
-      name: "signin"
+      name: "signIn"
     })
 	}
-	const handleRedirectUserInfoModal = (username) => () => {
+	const handleRedirectUserInfoModal = (username) => {
 		router.push({
       name: "userInfo",
 			params: {
@@ -70,7 +74,7 @@
 	
 	onMounted(() => {
 		const refresh_token = localStorage.getItem('refresh_token')
-		if(!userInfo?.id && refresh_token){
+		if(!userInfo.value && refresh_token){
 			store.dispatch('userInfo/signInAction', { 
 				openNotification: props.openNotification,
 				navigate: router.push,
@@ -78,7 +82,6 @@
 			})
 		}
 	})
-
 </script>
 
 <style lang="scss">

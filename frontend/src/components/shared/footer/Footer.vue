@@ -7,7 +7,7 @@
 	</div>
 </template>
 
-<script setup >
+<script setup lang="ts" >
 	import moment from 'moment'
 	import ALogo from '@app/shared/footer/svg/telegramm.svg';
 	import { computed } from 'vue';
@@ -37,6 +37,12 @@
 			margin-left: 5px;
 			height: 19px;
 			width: 15px;
+		}
+		&__text{
+			font-size: 14px;
+			display: flex;
+			justify-content: center;
+			padding-top: 2px;
 		}
 	}
 </style>

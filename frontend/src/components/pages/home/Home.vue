@@ -1,27 +1,23 @@
 ﻿<template >
-	<div className="home">
-		<div className="home__explanation">
-			<div className="home__title">
+	<div class="home">
+		<div class="home__explanation">
+			<div class="home__title">
 				<a-typography-text>Vue-Nestjs-PostgreSQL Startup</a-typography-text>
 			</div>
-			<div className="home__content">
+			<div class="home__content">
 				<a-typography-text>A place to share your knowledge.</a-typography-text>
 			</div>
 		</div>
-		<a-row :justify="end">
+		<a-row>
 			<a-col :span="1"></a-col>
 			<a-col :span="16">Feeds</a-col>
 			<a-col :span="1"></a-col>
 			<a-col :span="6">PopularTags</a-col>
 		</a-row>
-		<a-row :justify="end" class="home__footer">
-			<a-col :span="24"><app-footer></app-footer></a-col>
-		</a-row>
 	</div>
 </template>
 
-<script setup >
-	import AppFooter from '@app/shared/footer/Footer.vue';
+<script setup lang="ts">
 </script>
 
 <style lang="scss">

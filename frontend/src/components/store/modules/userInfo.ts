@@ -1,7 +1,26 @@
 ﻿import type { IAxiosResponse, IInitialState } from '@app/store/store'
-import { ICallNotificationAction, INavigateAction, INotificationAction } from '@app/shared/layout/types'
+import { NoticeType } from 'antd/es/message/interface'
 import { IAdditionalArticleInfo, IArticle, ILikeArticleResponse } from '@app/store/modules/article'
 import api from '@app/api/api'
+
+export interface INotification {
+	content: string,
+  type: NoticeType
+}
+
+export interface INotificationAction {
+	openNotification?: (data: INotification) => void
+}
+
+export interface INavigateAction {
+	navigate?: (data: string) => void
+}
+
+export interface ICallNotificationAction {
+	type: NoticeType,
+	message: string,
+	error?: string,
+}
 
 export interface IUserInfo {
 	id: number;
@@ -175,24 +194,24 @@ const moduleUserInfo = {
 
 		async signInAction({ commit, dispatch }, payload: ISignIn & INotificationAction & INavigateAction){
 			const { openNotification, navigate, ...userInfo} = payload
-			// const callNotification = ({type, message}: ICallNotificationAction ) => {
-			// 	openNotification({
-			// 		content: message,
-			// 		type
-			// 	})
-			// }
+			const callNotification = ({type, message}: ICallNotificationAction ) => {
+				openNotification({
+					content: message,
+					type
+				})
+			}
 			const response = await api({ method: 'post', url: 'auth', data: userInfo })
-			// if(response.status >= 400){
-			// 	callNotification({
-			// 		type: 'error',
-			// 		message: response.data.message
-			// 	})
-			// 	return commit('signInAction_rejected', response) 
-			// }	else {
-			// 	if(navigate){
-			// 		navigate('/si')
-			// 	}
-			// }
+			if(response.status >= 400){
+				callNotification({
+					type: 'error',
+					message: response.data.message
+				})
+				return commit('signInAction_rejected', response) 
+			}	else {
+				if(navigate){
+					navigate('/')
+				}
+			}
 			if(response?.data?.refresh_token){
 				localStorage.setItem('refresh_token', response.data.refresh_token)
 			}

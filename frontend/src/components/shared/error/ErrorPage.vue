@@ -1,19 +1,6 @@
-﻿<template >
-  <div>Not Found</div>
+﻿<template>
+  <h1>Something went wrong.</h1>
 </template>
 
-<script >
-  export default {
-  }
+<script setup lang="ts">
 </script>
-
-<style>
-</style>
-
-<!-- import React from 'react'
-
-const ErrorPage: React.FC = () => {
-	return <h1>Something went wrong.</h1>
-}
-
-export default ErrorPage -->

@@ -1,7 +1,6 @@
 ﻿import type { IAxiosResponse, IInitialState } from '@app/store/store'
 import api from '@app/api/api'
-import { INavigateAction, INotificationAction } from '@app/shared/layout/types'
-import { IUserInfo } from '@app/store/modules/userInfo'
+import { INavigateAction, INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
 
 export interface IOtherAuthorInfo {
 	username: string;

@@ -1,13 +1,76 @@
 ﻿<template >
-  <div>Hello World</div>
+  <div class="signin">
+		<a-typography-title class="signin__text">Sign In</a-typography-title>
+		<!-- <NavLink to={'/signup'} className={'signin__link-title'}>
+			Need an account?
+		</NavLink>
+		<Form
+			form={form}
+			name="signin"
+			{...formItemLayout}
+			initialValues={{ remember: true }}
+			onFinish={handleSubmitForm}
+			autoComplete="off"
+		>
+			<Form.Item 
+				hasFeedback
+				label="Username" 
+				name="username" 
+				validateDebounce={1000}
+				rules={[{ required: true, validator:handleUsernameValidator }]}
+			>
+				<Input placeholder="Input username" />
+			</Form.Item>
+
+			<Form.Item 
+				hasFeedback
+				label="Pass" 
+				name="pass" 
+				validateDebounce={1000}
+				rules={[{ required: true, validator: handlePasswordValidator }]}
+			>
+				<Input.Password placeholder="Input password" autoComplete='on'/>
+			</Form.Item>
+
+			<Form.Item 
+				hasFeedback
+				name="remember" 
+				label="Remember me" 
+				valuePropName="checked"
+			>
+				<Checkbox/>
+			</Form.Item>
+
+			<Form.Item {...tailFormItemLayout}>
+				<Button type="primary" htmlType="submit">
+					Submit
+				</Button>
+			</Form.Item>
+		</Form> -->
+	</div>
 </template>
 
-<script >
-  export default {
-  }
+<script setup lang="ts">
+
 </script>
 
-<style>
+<style lang="scss">
+	@import '@app/app.scss';
+
+	.signin{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		& form {
+			width: 100%;
+			max-width: 800px;
+		}
+		&__link-title{
+			color: $blue-color;
+			text-decoration: none;
+			font-size: 16px;
+		}
+	}
 </style>
 
 
