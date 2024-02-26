@@ -1,6 +1,7 @@
 ﻿const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
@@ -67,6 +68,11 @@ module.exports = {
 			filename: '[name].css'
 		}),
 		new VueLoaderPlugin(),
+		new webpack.DefinePlugin({
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: true,
+			__VUE_PROD_HYDRATION_MISMATCH_DETAILS__: true,
+    }),
 	],
 	optimization: {
 		removeAvailableModules: true,

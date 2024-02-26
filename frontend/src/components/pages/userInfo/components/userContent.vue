@@ -1,46 +1,35 @@
-<template >
-  <div>Hello World</div>
-</template>
+<script setup lang="ts" >
+	import { ref, computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
+	import { useRoute, useRouter } from 'vue-router'
+	import { useStore } from 'vuex'
+	import { UploadFile } from 'antd'
+	import { Form } from 'ant-design-vue';
+	import { PlusOutlined as AppPlusOutlined } from '@ant-design/icons-vue';
+	
+	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
+	import { IOtherAuthorInfo } from '@app/store/modules/otherAuthorInfo';
 
-<script >
-  export default {
-  }
-</script>
+	interface FormState {
+		username: string;
+		email: string;
+		bio: string;
+		age: number;
+		gender: string;
+	}
 
-<style>
-</style>
+	interface IProps{
+		openNotification: INotificationAction['openNotification'];
+	}
 
-
-<!-- import React, { useEffect, useState }from 'react'
-import { useSelector } from 'react-redux'
-import { Form, Input, Button, Typography, InputNumber, Select, Flex, Popconfirm, Upload, UploadFile, Modal } from 'antd'
-import { useOutletContext, useNavigate, useParams } from 'react-router-dom'
-
-import { RootState, useAppDispatch } from '@app/store/store'
-import { updateUserInfoAction, IUserInfo, savePreviewUserAvatarAction } from '@app/store/slices/userInfo'
-import { getOtherAuthorInfoAction, IOtherAuthorInfo } from '@app/store/slices/otherAuthorInfo'
-import { resetUserInfoAction, deleteUserInfoAction, deletePreviewUserAvatarAction } from '@app/store/slices/userInfo'
-import { loadUserArticlesAction } from '@app/store/slices/article'
-import { PlusOutlined } from '@ant-design/icons'
-import { INotification } from '@app/shared/layout/types'
-
-const { TextArea } = Input
-
-const { Title } = Typography
-
-const formItemLayout = {
-	labelCol: {
+	const labelCol = {
 		xs: { span: 24 },
 		sm: { span: 4 }
-	},
-	wrapperCol: {
+	}
+	const wrapperCol = {
 		xs: { span: 24 },
 		sm: { span: 16 }
 	}
-}
-
-const tailFormItemLayout = {
-	wrapperCol: {
+	const tailWrapperCol = {
 		xs: {
 			span: 24,
 			offset: 0
@@ -50,117 +39,55 @@ const tailFormItemLayout = {
 			offset: 4
 		}
 	}
-}
-
-// type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-
-const UserContent: React.FC = () => {
-	const dispatch = useAppDispatch()
-	const userInfo = useSelector((state: RootState) => state.userInfo.data as IUserInfo)
-	const otherAuthorInfo = useSelector((state: RootState) => state.otherAuthorInfo.data as IOtherAuthorInfo)
-	const {username} = useParams()
-	const openNotification = useOutletContext<(data: INotification) => void>()
-	const [form] = Form.useForm()
-	const navigate = useNavigate()
-	const [uploadOptions, setUploadOptions] = useState({
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const route = useRoute()
+	const router = useRouter()
+	const useForm = Form.useForm;
+	const modelRef: UnwrapRef<FormState> = reactive({
+		username: route.params.username.toString(),
+		email: '',
+		bio: '',
+		age: null,
+		gender: '',
+	});
+	const uploadOptions = reactive({
 		title: '',
 		image: '',
 		open: false,
 		showPreview: true,
 		fileInfo: null,
 		fileList: []
-	})
-
-
-
-	useEffect(() => {
-		form.resetFields()
-		if(userInfo?.username !== username){
-			dispatch(getOtherAuthorInfoAction({username}))
-			dispatch(loadUserArticlesAction({username, page: 1, limit: 10}))
-		}
-		if(userInfo?.username === username ) {
-			if(userInfo?.avatarUrl){
-				setUploadOptions({
-					...uploadOptions,
-					image: `http://localhost:3000${userInfo?.avatarUrl}`,
-					showPreview: true,
-					fileList: [{
-						uid: `${username}`,
-						name: `${userInfo?.avatarUrl}`.replace('/avatars/', ''),
-						status: 'done',
-						url: `http://localhost:3000${userInfo?.avatarUrl}`,
-					}]})
-			}else {
-				setUploadOptions({...uploadOptions, fileInfo: null, fileList: [], showPreview: false})
-			}
-		
-		}
-	}, [username])
-
-	useEffect(() => {
-		const user = userInfo?.username === username ? userInfo : otherAuthorInfo
-		form.setFieldsValue(user)
-		if(user?.avatarUrl) {
-			setUploadOptions({
-				...uploadOptions,
-				image: `http://localhost:3000${user?.avatarUrl}`,
-				showPreview: true,
-				fileList: [	{
-					uid: `${username}`,
-					name: `${userInfo?.avatarUrl}`.replace('/avatars/', ''),
-					status: 'done',
-					url: `http://localhost:3000${user?.avatarUrl}`,
-				}]})
-		}
-	}, [userInfo, otherAuthorInfo])
-
-	const handleEmailValidator = (rule: { required: boolean }, value: string) => {
+	});
+	const handleEmailValidator = (rule: { required: boolean }, value: string, cb) => {
 		if(rule?.required && (!value || !value.trim())){
-			return Promise.reject(new Error('Field must not be empty'))
+			return Promise.reject('Field must not be empty')
 		}
 		if(value.length < 6){
-			return Promise.reject(new Error('Email length must be longer than 6 characters'))
+			return Promise.reject('Email length must be longer than 6 characters')
 		}
 		if(value.search(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)){
-			return Promise.reject(new Error('Incorrect email. Example correct email: test@gmail.com'))
+			return Promise.reject('Incorrect email. Example correct email: test@gmail.com')
 		}
 		return Promise.resolve()
 	}
+	const handleAgeValidator = (rule: { required: boolean }, value: number, cb) => {
+		if(value <= 0){
+			return Promise.reject('Age must be more 0')
+		}
+		return Promise.resolve()
+	}
+	const rulesRef = reactive({	email: [{ required: true, validator: handleEmailValidator	}],	age:[{ validator: handleAgeValidator }]});
+	const { resetFields, validate } = useForm(modelRef, rulesRef);
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
+	const otherAuthorInfo = computed<IOtherAuthorInfo>(() => store.getters["otherAuthorInfo/getOtherAuthorInfo"])
+	const isDisabledInput = computed<boolean>(() => route.params.username && userInfo.value?.username !== route.params.username)
 
 	const genderOptions =[
 		{label: 'male', value: 'male'},
 		{label: 'female', value: 'female'},
 		{label: 'others', value: 'others'}
 	]
-
-	const handleSubmitForm = () => {
-		form.validateFields().then((values) => {
-			const formData = new FormData()
-			if(uploadOptions.fileInfo){
-				formData.append('avatar', uploadOptions.fileInfo?.preview)
-				formData.append('ext', uploadOptions.fileInfo?.ext)
-				formData.append('avatarDate', uploadOptions.fileInfo?.avatarDate)
-				Object.keys(values).map(key => formData.append(key, values[key]))
-				dispatch(updateUserInfoAction({...values, formData, openNotification, navigate }))
-			}else{
-				formData.append('avatarDate', uploadOptions.fileInfo?.avatarDate 
-					? uploadOptions.fileInfo.avatarDate 
-					: `${userInfo?.avatarUrl}`.replace(`/avatars/${userInfo?.username}-`, '').replace(/\.\w+$/g, ''))
-				dispatch(deletePreviewUserAvatarAction({username, formData}))
-				Object.keys(values).map(key => formData.append(key, values[key]))
-				dispatch(updateUserInfoAction({...values, formData, openNotification, navigate }))
-			}
-		})
-	}
-
-	const handleLogOutUser = () => {
-		dispatch(resetUserInfoAction({navigate}))
-	}
-
-	const handleDeleteUser = () => {
-		dispatch(deleteUserInfoAction({navigate, username}))
-	}
 
 	const handleUploadAvatarEvent = async options => {
 		const { onSuccess, onError, file } = options
@@ -170,7 +97,6 @@ const UserContent: React.FC = () => {
 			onError({ err: `Unsupported file type ${file.type}` })
 		}
 	}
-
 	const handleLoadAvatar = async ({ file, fileList, event }) => {
 		if(file.status === 'removed') return 
 		if(file.status === 'error') return
@@ -194,137 +120,223 @@ const UserContent: React.FC = () => {
 			formData.append('ext', fileInfo.ext)
 			formData.append('avatarDate', avatarDate)
 			const cb = () => {
-				setUploadOptions({
-					...uploadOptions,
-					fileInfo,
-					image: `http://localhost:3000/avatars/${username}-${avatarDate}.${fileInfo.ext}`,
-					showPreview: true,
-					fileList: [	{
-						uid: `${username}`,
-						name: `${username}.${fileInfo.ext}`,
+				uploadOptions.fileInfo = fileInfo
+				uploadOptions.image = `http://localhost:3000/avatars/${route.params.username}-${avatarDate}.${fileInfo.ext}`
+				uploadOptions.showPreview = true
+				uploadOptions.fileList = [	{
+						uid: `${route.params.username}`,
+						name: `${route.params.username}.${fileInfo.ext}`,
 						status: 'done',
-						url: `http://localhost:3000/avatars/${username}-${avatarDate}.${fileInfo.ext}`,
-					}]})
+						url: `http://localhost:3000/avatars/${route.params.username}-${avatarDate}.${fileInfo.ext}`,
+					}]
 			}
-			dispatch(savePreviewUserAvatarAction({username, formData, cb}))
+			store.dispatch('userInfo/savePreviewUserAvatarAction', {username: route.params.username, formData, cb})
 		}
 	}
-	
 	const handleCancelAvatar = () => {
-		setUploadOptions({...uploadOptions, fileInfo: null, fileList: [],  showPreview: false})
+		uploadOptions.fileInfo = null,
+		uploadOptions.fileList = [],
+		uploadOptions.showPreview = false
 		return 
 	}
-
-	const handleClosePreviewAvatar = () => setUploadOptions({...uploadOptions, open: false})
 	const handleShowPreviewAvatar = async (file: UploadFile) => {
-		setUploadOptions({...uploadOptions, open: true, title: userInfo?.username === username ? userInfo.username : otherAuthorInfo.username})
+		uploadOptions.open = true
+		uploadOptions.title = userInfo.value?.username === route.params.username ? userInfo.value?.username : otherAuthorInfo.value.username
 	}
+	const handleClosePreviewAvatar = () => {
+		uploadOptions.open = false
+	} 
+	const handleLogOutUser = () => {
+		store.dispatch('userInfo/resetUserInfoAction', {navigate: router.push })
+	}
+	const handleDeleteUser = () => {
+		store.dispatch('userInfo/deleteUserInfoAction', {navigate: router.push, username: userInfo.value?.username })
+	}
+	
+	const handleSubmitForm = (e) => {
+		const formData = new FormData()
+		validate().then(() => {
+			const values = toRaw(modelRef);
+			if(uploadOptions.fileInfo){
+				formData.append('avatar', uploadOptions.fileInfo?.preview)
+				formData.append('ext', uploadOptions.fileInfo?.ext)
+				formData.append('avatarDate', uploadOptions.fileInfo?.avatarDate)
+				Object.keys(values).map(key => formData.append(key, values[key]))
+				store.dispatch('userInfo/updateUserInfoAction', {...values, formData, openNotification: props.openNotification, navigate: router.push })
+			}else{
+				formData.append('avatarDate', uploadOptions.fileInfo?.avatarDate 
+					? uploadOptions.fileInfo.avatarDate 
+					: `${userInfo.value?.avatarUrl}`.replace(`/avatars/${userInfo.value?.username}-`, '').replace(/\.\w+$/g, ''))
+				if(uploadOptions.fileList.length < 1){
+					store.dispatch('userInfo/deletePreviewUserAvatarAction', {username: userInfo.value?.username, formData })
+				} else {
+					formData.append('avatarUrl', userInfo.value?.avatarUrl)
+				}
+				Object.keys(values).map(key => formData.append(key, values[key]))
+				store.dispatch('userInfo/updateUserInfoAction', {...values, formData, openNotification: props.openNotification, navigate: router.push })
+			}
+		})
+		.catch(err => {
+			console.log('error', err);
+		});
+	}
+	onMounted(async () => {
+		resetFields()
+		if(userInfo.value?.username !== route.params.username){
+			await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
+			await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
+		} 
+		const matchUser = userInfo.value?.username === route.params.username
+			if(userInfo.value?.avatarUrl){
+				uploadOptions.image = `http://localhost:3000${matchUser ? userInfo.value?.avatarUrl : otherAuthorInfo.value?.avatarUrl}`,
+				uploadOptions.showPreview = true,
+				uploadOptions.fileList = [{
+						uid: `${route.params.username}`,
+						name: `${matchUser ? userInfo.value?.avatarUrl : otherAuthorInfo.value?.avatarUrl}`.replace('/avatars/', ''),
+						status: 'done',
+						url: `http://localhost:3000${matchUser ? userInfo.value?.avatarUrl : otherAuthorInfo.value?.avatarUrl}`,
+					}]
+			}else {
+				uploadOptions.fileInfo = null,
+				uploadOptions.fileList = [],
+				uploadOptions.showPreview = false
+			}
+			modelRef.username = matchUser ? userInfo.value?.username : otherAuthorInfo.value?.username
+			modelRef.email = matchUser ? userInfo.value?.email : otherAuthorInfo.value?.email
+			modelRef.bio = matchUser ? userInfo.value?.bio : otherAuthorInfo.value?.bio
+			modelRef.age = matchUser ? userInfo.value?.age : otherAuthorInfo.value?.age
+			modelRef.gender = matchUser ? userInfo.value?.gender : otherAuthorInfo.value?.gender
+	})
+</script>
 
-	return (
-		<div className="user-content">
-			<Title className={'user-content__text'}>User Info</Title>
-			<div className='user-content__avatar'>
-				<Upload
+<template >
+  <div class="user-content">
+		<a-typography-text class="user-content__text">User Info</a-typography-text>
+			<div class="user-content__avatar">
+				<a-upload
 					accept="image/*"
-					listType="picture-circle"
-					maxCount={1}
-					customRequest={handleUploadAvatarEvent}
-					onChange={handleLoadAvatar}
-					onRemove={handleCancelAvatar}
-					onPreview={handleShowPreviewAvatar}
-					showUploadList={uploadOptions.showPreview}
-					fileList={uploadOptions.fileList}
-					defaultFileList={uploadOptions.fileList}
-					disabled={userInfo?.username !== username}
-					className="image-upload-grid"
+					list-type="picture-card"
+					:multiple="false"
+					v-model:file-list="uploadOptions.fileList"
+					:customRequest="handleUploadAvatarEvent"
+					@change="handleLoadAvatar"
+					@remove="handleCancelAvatar"
+					@preview="handleShowPreviewAvatar"
+					:showUploadList="uploadOptions.showPreview"
+					:defaultFileList="uploadOptions.fileList"
+					:disabled="userInfo?.username !== route.params.username"
+					class="image-upload-grid"
 				>
-					{uploadOptions.fileList.length >= 1 
-							 ? null
-							 : (<div className='user-content__upload'>
-							<div><PlusOutlined /></div>
-							<div>Upload</div>
-							 </div>)}
-				</Upload>
-				<Modal open={uploadOptions.open} title={uploadOptions.title} footer={null} onCancel={handleClosePreviewAvatar}>
-					<img style={{ width: '100%' }} src={uploadOptions.image} />
-				</Modal>
+					<div v-if="uploadOptions.fileList.length < 1">
+						<app-plus-outlined />
+						<div class="ant-upload-text">Upload</div>
+					</div>
+				</a-upload>
+				<a-modal :open="uploadOptions.open" :title="uploadOptions.title" :footer="null" @cancel="handleClosePreviewAvatar">
+					<img class="user-content__modal" :src="uploadOptions.image" />
+				</a-modal>
 			</div>
-			<Form
-				form={form}
-				name="user-content"
-				{...formItemLayout}
-				initialValues={{ remember: true }}
-				onFinish={handleSubmitForm}
-				autoComplete="off"
+			<a-form
+				:labelCol="labelCol"
+				:wrapperCol="wrapperCol"
 			>
-				<Form.Item 
+				<a-form-item 
 					label="Username" 
 					name="username" 
-					initialValue={username}
 				>
-					<Input disabled />
-				</Form.Item>
+					<a-input disabled v-model:value="modelRef.username" ></a-input>
+				</a-form-item>
 
-				<Form.Item 
+				<a-form-item 
 					label="Email" 
-					name="email" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator:handleEmailValidator }]}
-					initialValue={userInfo?.email}
+					name="email"
 				>
-					<Input disabled={username && userInfo?.username !== username} />
-				</Form.Item>
+					<a-input :disabled="isDisabledInput" placeholder="Input email" v-model:value="modelRef.email" ></a-input>
+				</a-form-item>
 
-				<Form.Item 
+				<a-form-item
 					label="Bio" 
 					name="bio"
-					initialValue={userInfo?.bio}
 				>
-					<TextArea disabled={username && userInfo?.username !== username} placeholder="Input bio" />
-				</Form.Item>
+					<a-textarea :disabled="isDisabledInput" placeholder="Input bio" v-model:value="modelRef.bio"></a-textarea>
+				</a-form-item>
 
-				<Form.Item 
+				<a-form-item 
 					label="Age" 
-					name="age" 
-					initialValue={userInfo?.age}
+					name="age"
 				>
-					<InputNumber disabled={username && userInfo?.username !== username} placeholder="Input age" />
-				</Form.Item>
+					<a-input type="number" :disabled="isDisabledInput" placeholder="Input age" v-model:value="modelRef.age"></a-input>
+				</a-form-item>
 
-				<Form.Item 
+				<a-form-item 
 					label="Gender" 
 					name="gender"
-					initialValue={userInfo?.gender}
 				>
-					<Select disabled={username && userInfo?.username !== username} options={genderOptions} />
-				</Form.Item>
-				<Form.Item {...tailFormItemLayout}>
-					<Flex gap="small" wrap="wrap">
-						{username && userInfo?.username === username	
-							? (<>
-								<Button type="primary" htmlType="submit">
-										Submit
-								</Button>
-								<Button type="primary" ghost onClick={handleLogOutUser}>
-									Log Out
-								</Button>
-								<Popconfirm
-									 title="Удалить статью"
-									 description="Вы уверены что хотите удалить пользователя и все его статьи?"
-									 onConfirm={handleDeleteUser}
-									 okText="Да"
-									 cancelText="Нет"
-								>
-									<Button type="primary" danger >
-									Delete
-									</Button>
-								</Popconfirm>
-							</>) : null}
-					</Flex>
-				</Form.Item>
-			</Form>
-		</div>
-	)
-}
+					<a-select :disabled="isDisabledInput" :options="genderOptions"  v-model:value="modelRef.gender" ></a-select>
+				</a-form-item>
+				<a-form-item :wrapperCol="tailWrapperCol" >
+					<div v-if="!isDisabledInput">
+						<a-button class="user-content__button" type="primary" @click.prevent="handleSubmitForm">
+							Submit
+						</a-button>
+						<a-button class="user-content__button" type="primary" ghost @click="handleLogOutUser">
+							Log Out
+						</a-button>
 
-export default UserContent -->
+						<a-popconfirm
+							title="Вы уверены что хотите удалить пользователя и все его статьи?"
+							@confirm="handleDeleteUser"
+							okText="Да"
+							cancelText="Нет"
+						>
+							<a-button type="primary" danger >
+								Delete
+							</a-button>
+						</a-popconfirm>
+					</div>
+				</a-form-item>
+			</a-form>
+		</div>
+</template>
+
+<style lang="scss">
+	@import '@app/app.scss';
+
+	.user-content{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		& form {
+			width: 100%;
+			max-width: 800px;
+		}
+		& h1{
+			display: flex;
+			justify-content: center;
+		}
+		&__link-title{
+			color: $blue-color;
+			text-decoration: none;
+			font-size: 16px;
+		}
+
+		&__upload{
+			display: flex;
+			flex-direction: column;
+		}
+		&__avatar{
+			display: flex;
+			justify-content: center;
+		}
+		&__modal{
+			width: 100%
+		}
+		&__button {
+			margin-right: 8px;
+		}
+	}
+	.error-infos :deep(.ant-form-explain) {
+		white-space: pre-line;
+	}
+</style>

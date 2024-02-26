@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 	import { LoginOutlined as AppLoginOutlined, RocketTwoTone as AppRocketTwoTone } from '@ant-design/icons-vue';
-	import {computed, onMounted, defineProps } from 'vue';
+	import { computed, onMounted, defineProps } from 'vue';
 	import { useRouter } from 'vue-router'
 	import { useStore } from 'vuex'
 
@@ -43,13 +43,11 @@
 	const props = defineProps<IProps>();
 	const store = useStore()
 	const router = useRouter()
-
 	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
-	const avatarSrc = computed<string>(() => userInfo.value.avatarUrl 
-		? `http://localhost:3000${userInfo.value.avatarUrl}` 
-		: `https://api.dicebear.com/7.x/miniavs/svg?seed=${userInfo.value.id}`
+	const avatarSrc = computed<string>(() => userInfo.value?.avatarUrl 
+		? `http://localhost:3000${userInfo.value?.avatarUrl}` 
+		: `https://api.dicebear.com/7.x/miniavs/svg?seed=${userInfo.value?.id}`
 	)
-
 	const handleRedirectHome = () => {
 		router.push({
       name: "home"
@@ -71,7 +69,6 @@
 			}
     })
 	}
-	
 	onMounted(() => {
 		const refresh_token = localStorage.getItem('refresh_token')
 		if(!userInfo.value && refresh_token){

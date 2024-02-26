@@ -1,13 +1,15 @@
-﻿
-
-<script setup lang="ts" >
-	import { ref } from 'vue';
+﻿<script setup lang="ts">
+	import { ref, h } from 'vue';
 	import { TabsProps } from 'antd'
 	import { useRouter, useRoute } from 'vue-router'
-	import { h } from 'vue'
 
-	import AppMessage from '@app/shared/message/Message.vue'
+	import UserContent from '@app/pages/userInfo/components/userContent.vue'
+	import { INotificationAction } from '@app/store/modules/userInfo';
 
+	interface IProps{
+		openNotification: INotificationAction['openNotification'];
+	}
+	const props = defineProps<IProps>()
 	const router = useRouter()
 	const route = useRoute()
   const tabQuery = ref('user-content');		
@@ -15,12 +17,12 @@
 		{
 			key: 'user-content',
 			label: 'User Info',
-			children: h(AppMessage, { message: 'User content'}),
+			children: h(UserContent, { openNotification: props.openNotification}),
 		},
 		{
 			key: 'articles-content',
 			label: 'Articles Info',
-			children: h(AppMessage, { message: 'Articles content'}),
+			children: h('div'),
 		}
 	])
 	const handleChangeTab = (activeKey) => {
@@ -42,42 +44,13 @@
 			class="user-info__tabs"
 			@change="handleChangeTab"
 		>
-		<a-tab-pane v-for="tab in tabs" :key="tab.key" :destroyInactiveTabPane="true" :tab="tab.label" ><component :is="tab.children"></component></a-tab-pane>
+		<a-tab-pane v-for="tab in tabs" :key="tab.key" :destroyInactiveTabPane="true" :tab="tab.label"><component :is="tab.children"></component></a-tab-pane>
 	</a-tabs>
 	</div>
 </template>
 
 <style lang="scss">
 	@import '@app/app.scss';
-
-	.user-content{
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 100%;
-		& form {
-			width: 100%;
-			max-width: 800px;
-		}
-		& h1{
-			display: flex;
-			justify-content: center;
-		}
-		&__link-title{
-			color: $blue-color;
-			text-decoration: none;
-			font-size: 16px;
-		}
-
-		&__upload{
-			display: flex;
-			flex-direction: column;
-		}
-		&__avatar{
-			display: flex;
-			justify-content: center;
-		}
-	}
 
 	.article-content{
 		display: flex;
@@ -107,93 +80,3 @@
 		}
 	}
 </style>
-
-
-
-<!-- import React, { useEffect, useState }from 'react'
-import { useSelector } from 'react-redux'
-import { Input, Typography, Tabs, TabsProps } from 'antd'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import queryString from 'query-string'
-
-import '@app/pages/userInfo/userInfo.scss'
-import { RootState } from '@app/store/store'
-import UserContent from './components/userContent'
-import ArticlesContent from './components/articleContent'
-import { INotificationAction } from '@app/shared/layout/types'
-
-const { TextArea } = Input
-
-const { Title } = Typography
-
-const formItemLayout = {
-	labelCol: {
-		xs: { span: 24 },
-		sm: { span: 4 }
-	},
-	wrapperCol: {
-		xs: { span: 24 },
-		sm: { span: 16 }
-	}
-}
-
-const tailFormItemLayout = {
-	wrapperCol: {
-		xs: {
-			span: 24,
-			offset: 0
-		},
-		sm: {
-			span: 16,
-			offset: 4
-		}
-	}
-}
-
-const UserInfo: React.FC = () => {
-	const navigate = useNavigate()
-	const {username} = useParams()
-	const openNotification = useOutletContext()
-	const [tabQuery, setTabQuery]  = useState('')
-	const userInfo = useSelector((state: RootState) => state.userInfo.data)
-	const tabs: TabsProps['items'] = [
-		{
-			key: 'user-content',
-			label: 'User Info',
-			children: <UserContent /> ,
-		},
-		{
-			key: 'articles-content',
-			label: 'Articles Info',
-			children: <ArticlesContent openNotification={openNotification as INotificationAction['openNotification']}/>,
-		}
-	]
-
-	useEffect(() => {
-		const { tab } = queryString.parse(window.location.search)
-		const currentTab = tab ? `${tab}` : 'user-content'
-		setTabQuery(currentTab)
-		if(username){
-			navigate(`/userinfo/${username}?${queryString.stringify({ tab: currentTab})}`)
-		}
-	}, [userInfo?.username]) 
-
-	const onChange = (key: string) => {
-		setTabQuery(key)
-		navigate(`/userinfo/${username}?${queryString.stringify({ tab: key})}`)
-	}
-
-	return ( 
-		<div className="user-info">
-			<Tabs 
-				className={'user-info__tabs'}
-				defaultActiveKey="user-content"
-				items={tabs}
-				activeKey={tabQuery}
-				onChange={onChange}
-			/>
-		</div>
-	)
-}
-
-export default UserInfo -->

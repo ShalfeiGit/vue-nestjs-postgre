@@ -48,7 +48,7 @@ const moduleOtherAuthorInfo = {
 		}, 
 	},
 	actions: {
-		async updateUserInfoAction({ commit, dispatch }, payload: Pick<IOtherAuthorInfo, 'username'> & INotificationAction & INavigateAction){
+		async getOtherAuthorInfoAction({ commit, dispatch }, payload: Pick<IOtherAuthorInfo, 'username'> & INotificationAction & INavigateAction){
 			const { username } = payload	
 			const response: IAxiosResponse<IUserInfo> = await api({ method: 'get', url: `user/author/${username}` })
 			if(response.status >= 400){

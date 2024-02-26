@@ -26,7 +26,7 @@
 
 <template >
 	<app-menu :openNotification="openNotification"></app-menu>
-	<router-view></router-view>
+	<router-view :openNotification="openNotification"></router-view>
 	<div v-if="isShowFooter">
 		<app-footer></app-footer>	
 	</div>

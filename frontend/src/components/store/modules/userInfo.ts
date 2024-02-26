@@ -177,19 +177,14 @@ const moduleUserInfo = {
 		async savePreviewUserAvatarAction({ commit, dispatch }, payload: Pick<IUserInfo, 'username'> & IFormData){
 			const {formData, username, cb} = payload
 			const response: IAxiosResponse<IUserInfo> = await api({ method: 'put', url: `user/${username}/avatar`, data: formData, headers: { 'Content-Type': 'multipart/form-data'} })
-			if(response.status >= 400){
-				return commit('savePreviewUserAvatarAction_rejected', response)
-			}	
 			if(cb){
 				cb()
 			}
-			return commit('savePreviewUserAvatarAction_fulfilled', response)
 	 	},
 			
 		async deletePreviewUserAvatarAction({ commit, dispatch }, payload: Pick<IUserInfo, 'username'> & {formData}){
 			const {formData,   ...userInfo } = payload
 			const response = await api({ method: 'delete', url: `user/${userInfo?.username}/avatar` , data: formData, headers: {  'Content-Type': 'multipart/form-data' } })
-			return commit('deletePreviewUserAvatarAction_fulfilled', response)
 	 	},
 
 		async signInAction({ commit, dispatch }, payload: ISignIn & INotificationAction & INavigateAction){
@@ -243,6 +238,7 @@ const moduleUserInfo = {
 			const { navigate } = payload
 			navigate('/')
 			localStorage.clear()
+			return commit('resetUserInfoAction_fulfilled')
 	 	},
 
 		async deleteUserInfoAction({ commit, dispatch }, payload: Pick<IUserInfo, 'username'> & INavigateAction){
