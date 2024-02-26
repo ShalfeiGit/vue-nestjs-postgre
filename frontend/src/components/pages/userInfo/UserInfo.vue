@@ -4,6 +4,7 @@
 	import { useRouter, useRoute } from 'vue-router'
 
 	import UserContent from '@app/pages/userInfo/components/userContent.vue'
+	import ArticleContent from '@app/pages/userInfo/components/articleContent.vue'
 	import { INotificationAction } from '@app/store/modules/userInfo';
 
 	interface IProps{
@@ -22,7 +23,7 @@
 		{
 			key: 'articles-content',
 			label: 'Articles Info',
-			children: h('div'),
+			children: h(ArticleContent, { openNotification: props.openNotification}),
 		}
 	])
 	const handleChangeTab = (activeKey) => {
@@ -51,25 +52,6 @@
 
 <style lang="scss">
 	@import '@app/app.scss';
-
-	.article-content{
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 100%;
-		&__table{
-			width: 100%;
-		}
-		&__manage{
-			margin-right: 8px;
-		}
-		&__dashboard{
-			width: 100%;
-			display: flex;
-			justify-content: flex-end;
-			margin-bottom: 16px;
-		}
-	}
 
 	.user-info{
 		display: flex;

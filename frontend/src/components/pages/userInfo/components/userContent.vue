@@ -1,9 +1,8 @@
 <script setup lang="ts" >
-	import { ref, computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
+	import { computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
 	import { useRoute, useRouter } from 'vue-router'
 	import { useStore } from 'vuex'
-	import { UploadFile } from 'antd'
-	import { Form } from 'ant-design-vue';
+	import { Form, UploadFile } from 'ant-design-vue';
 	import { PlusOutlined as AppPlusOutlined } from '@ant-design/icons-vue';
 	
 	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
@@ -184,8 +183,8 @@
 		resetFields()
 		if(userInfo.value?.username !== route.params.username){
 			await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
-			await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
 		} 
+		await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
 		const matchUser = userInfo.value?.username === route.params.username
 			if(userInfo.value?.avatarUrl){
 				uploadOptions.image = `http://localhost:3000${matchUser ? userInfo.value?.avatarUrl : otherAuthorInfo.value?.avatarUrl}`,

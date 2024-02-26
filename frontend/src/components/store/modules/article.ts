@@ -1,7 +1,6 @@
-﻿import { IUserInfo } from '@app/store/modules/userInfo'
+﻿import { ICallNotificationAction, IUserInfo } from '@app/store/modules/userInfo'
 import type { IAxiosErrorResponse, IAxiosResponse, IInitialState } from '@app/store/store'
 import api from '@app/api/api'
-import { ICallNotificationAction } from '@app/shared/layout/types'
 
 export interface IFeedArticles {
 	articleId: string,
@@ -437,7 +436,7 @@ const moduleArticle = {
 			if(response.status >= 400){
 				return commit('loadUserArticlesAction_rejected', response)
 			}	else {
-				return commit('removeGroupArticlesAction_fulfilled', {
+				return commit('loadUserArticlesAction_fulfilled', {
 					...response,
 					data: {
 						username,
@@ -538,7 +537,11 @@ const moduleArticle = {
 			}
 		}
 	},
-	// getters: { ... }
+	getters: { 
+		getUserArticles: (state) => {
+			return state?.userArticles
+		}
+	}
 }
 
 export default moduleArticle

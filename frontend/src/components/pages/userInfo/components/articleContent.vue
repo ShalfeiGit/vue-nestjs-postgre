@@ -1,86 +1,71 @@
-<template >
-  <div>Hello World</div>
-</template>
-
-<script >
-  export default {
-  }
-</script>
-
-<style>
-</style>
-
-
-<!-- import React, {useEffect} from 'react'
-import { Button, Popconfirm, Table, Pagination } from 'antd'
-import { EditOutlined, CloseOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons'
-import type { TableProps } from 'antd'
-import { useNavigate, useParams} from 'react-router-dom'
-import { useSelector } from 'react-redux'
-
-import { RootState, useAppDispatch } from '@app/store/store'
-import { deleteArticleAction, loadUserArticlesAction } from '@app/store/slices/article'
-import { IUserInfo } from '@app/store/slices/userInfo'
-import { INotificationAction } from '@app/shared/layout/types'
-import { getOtherAuthorInfoAction } from '@app/store/slices/otherAuthorInfo'
-
-interface DataType {
-  key: string;
-  title: string;
-  content: string[];
-  tag: string;
-  likes: number;
-}
- interface IProps{
-	openNotification: INotificationAction['openNotification'];
- }
-const ArticleContent: React.FC<IProps> = (props) => {
-
-	const navigate = useNavigate()
-	const {username} = useParams()
-	const userInfo = useSelector((state: RootState) => state.userInfo.data as IUserInfo)
-
-	useEffect(() => {
-		if(userInfo?.username !== username){
-			dispatch(getOtherAuthorInfoAction({username}))
-			dispatch(loadUserArticlesAction({username, page: 1, limit: 10}))
-		}
-	}, [username])
+<script setup lang="ts">
+	import { computed, reactive, UnwrapRef, onMounted, toRaw, h } from 'vue';
+	import ArticleText from '@app/pages/userInfo/components/articleText.vue';
+	import ArticleManage from '@app/pages/userInfo/components/articleManage.vue';
+	import { PlusOutlined } from '@ant-design/icons-vue';
+	import { useRoute, useRouter } from 'vue-router'
+	import { useStore } from 'vuex'
+	import { TableProps } from 'ant-design-vue';
 	
-	const data: DataType[] = (useSelector((state: RootState) => state.article.userArticles.find(userArticle => userArticle?.username === username)?.articles?.items) ?? []).map(article => ({
-		key: `${article.id}`,
-		...article
-	}))
+	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
+	import { IArticle, IUserArticle } from '@app/store/modules/article';
+	import { PaginationConfig } from 'ant-design-vue/es/pagination';
 
-	const pagination = (useSelector((state: RootState) => state.article.userArticles.find(userArticle => userArticle?.username === username)?.articles?.meta))
-	const dispatch = useAppDispatch()
-
-	useEffect(() => {
-		if(userInfo?.username === username){
-			dispatch(loadUserArticlesAction({username: userInfo?.username, page: 1, limit: 10}))
-		}
-	}, [userInfo])
-
+	interface IProps{
+		openNotification: INotificationAction['openNotification'];
+	}
+	interface DataType {
+		key: string;
+		title: string;
+		content: string[];
+		tag: string;
+		likes: number;
+	}
+	
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const route = useRoute()
+	const router = useRouter()
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
+	const userArticles = computed<IUserArticle<IArticle>[]>(() => store.getters["article/getUserArticles"])	
+	
 	const handleAddArticle = () => {
-		navigate('/article/create')
+		router.push({
+      name: "createArticle"
+    })
 	}
 
 	const handleEditArticle = (id) => () => {
-		navigate(`/article/edit/${id}`)
+		router.push({
+      name: "editArticle",
+			params: {
+				slug: id
+			}
+    })
 	}
 
 	const handleViewArticle = (id) => () => {
-		navigate(`/article/preview/${id}`)
-	}
-
-	const handleRemoveArticle = (id) => () => {
-		const {openNotification}  = props
-		dispatch(deleteArticleAction({articleId: id, navigate, openNotification, username: userInfo?.username}))
+		router.push({
+      name: "previewArticle",
+			params: {
+				slug: id
+			}
+    })
 	}
 
 	const handleChangeArticlePagination = (page) =>{
-		dispatch(loadUserArticlesAction({username, page, limit: 10}))
+		store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page, limit: 10})
 	}
+
+	const handleRemoveArticle = (id) => () => {
+		store.dispatch('article/deleteArticleAction', {
+			articleId: id,
+			navigate: router.push,
+			openNotification: props.openNotification,
+			username: route.params.username
+		})
+	}
+
 	const columns: TableProps<DataType>['columns'] = [
 		{
 			title: 'Title',
@@ -91,16 +76,11 @@ const ArticleContent: React.FC<IProps> = (props) => {
 			title: 'Content',
 			dataIndex: 'content',
 			key: 'content',
-			render: content => (
-				<div className={'feed-articles__article'}>
-					<div className='feed-articles__article_gradient' />
-					{content.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
-				</div>
-			)
+			customRender: ({value}) => h(ArticleText, {content: value})
 		},
 		{
 			title: 'Tag',
-			dataIndex: 'tag',
+			dataIndex: 'tag',	
 			key: 'tag',
 		},
 		{
@@ -113,45 +93,75 @@ const ArticleContent: React.FC<IProps> = (props) => {
 			dataIndex: 'manage',
 			key: 'manage',
 			width:' 18%',
-			render: (manage, row) => {
-				return (
-					<div>
-						<Button className="article-content__manage" type="primary" shape="circle" icon={<EyeOutlined />}  onClick={handleViewArticle(row.key)}/>
-						{userInfo?.username === username && (<>
-							<Button className="article-content__manage" type="primary" shape="circle" icon={<EditOutlined />}  onClick={handleEditArticle(row.key)}/>
-							<Popconfirm
-									 title="Удалить статью"
-									 description="Вы уверены что хотите удалить статью?"
-									 onConfirm={handleRemoveArticle(row.key)}
-									 okText="Да"
-									 cancelText="Нет"
-							>
-								<Button className="article-content__manage" type="primary" danger  shape="circle" icon={<CloseOutlined />}/>
-							</Popconfirm>
-						</>)}
-					</div>
-				)
-			},
+			customRender: ({record}) => h(ArticleManage, {
+				handleViewArticle: handleViewArticle(record?.key),
+				handleEditArticle: handleEditArticle(record?.key),
+				handleRemoveArticle: handleRemoveArticle(record?.key),
+				userInfo,
+				username: route.params.username,
+				row: record
+			})
 		}
 	]
 
-	return (
-		<div className='article-content'>
-			<div className='article-content__dashboard'>
-				<Button type="primary"  icon={<PlusOutlined />} onClick={handleAddArticle} >
-					Создать
-				</Button>
-			</div>
-			<Table className='article-content__table' columns={columns} dataSource={data} pagination={{
-				onChange: handleChangeArticlePagination,
-				pageSize: pagination?.itemsPerPage ?? 10,
-				showSizeChanger: false,
-				showQuickJumper: false,
-				total: pagination?.totalItems ?? 0,
-				current: pagination?.currentPage?? 1
-			}}/>
-		</div>	
-	)
-} 
+	const data: DataType[] =  (userArticles.value.find(userArticle => userArticle?.username === route.params.username)?.articles?.items ?? []).map(article => ({
+		key: `${article.id}`,
+		...article
+	}))
 
-export default ArticleContent -->
+	const pagination =  computed<PaginationConfig>(() => ({
+		onChange: handleChangeArticlePagination,
+		pageSize: pagination?.itemsPerPage ?? 10,
+		showSizeChanger: false,
+		showQuickJumper: false,
+		total: pagination?.totalItems ?? 0,
+		current: pagination?.currentPage?? 1
+	}
+) ) 
+	onMounted(async () => {
+		if(userInfo.value?.username !==  route.params.username){
+			await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
+		}
+		await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
+	})
+</script>
+
+<template >
+  <div class='article-content'>
+		<div class='article-content__dashboard'>
+			<a-button type="primary"  @click="handleAddArticle" >
+				<template #icon><PlusOutlined /></template>
+				Создать
+			</a-button>
+		</div>
+		<a-table 
+			class='article-content__table'
+			:columns="columns" 
+			:dataSource="data" 
+			:pagination="pagination"
+		/>
+	</div>
+</template>
+
+<style lang="scss">
+	@import '@app/app.scss';
+
+	.article-content{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		&__table{
+			width: 100%;
+		}
+		&__manage{
+			margin-right: 8px;
+		}
+		&__dashboard{
+			width: 100%;
+			display: flex;
+			justify-content: flex-end;
+			margin-bottom: 16px;
+		}
+	}
+</style>
