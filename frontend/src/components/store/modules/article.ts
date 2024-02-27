@@ -417,13 +417,13 @@ const moduleArticle = {
 			if(response.status >= 400){
 				return commit('loadGroupArticlesAction_rejected', response)
 			}	else {
-				return {
+				return commit('loadGroupArticlesAction_fulfilled', {
 					...response,
 					data: {
 						tag,
 						articles: response.data
 					}
-				}
+				})
 			}
 	 	},
 		async removeGroupArticlesAction({ commit, dispatch }, payload){
@@ -450,7 +450,7 @@ const moduleArticle = {
 			if(response.status >= 400){
 				return commit('loadTagOptionsAction_rejected', response)
 			}	else {
-				return commit('removeGroupArticlesAction_fulfilled', response)
+				return commit('loadTagOptionsAction_fulfilled', response)
 			}
 		},
 		async createArticleAction({ commit, dispatch }, payload){
@@ -540,6 +540,12 @@ const moduleArticle = {
 	getters: { 
 		getUserArticles: (state) => {
 			return state?.userArticles
+		},
+		getTags: (state) => {
+			return state?.tags
+		},
+		getGroupArticles: (state) => {
+			return state?.groupArticles
 		}
 	}
 }

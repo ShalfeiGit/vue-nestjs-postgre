@@ -77,10 +77,13 @@
 		return Promise.resolve()
 	}
 	const rulesRef = reactive({	email: [{ required: true, validator: handleEmailValidator	}],	age:[{ validator: handleAgeValidator }]});
-	const { resetFields, validate } = useForm(modelRef, rulesRef);
+	const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef);
 	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
 	const otherAuthorInfo = computed<IOtherAuthorInfo>(() => store.getters["otherAuthorInfo/getOtherAuthorInfo"])
 	const isDisabledInput = computed<boolean>(() => route.params.username && userInfo.value?.username !== route.params.username)
+	const emailError = computed(() => {
+		return validateInfos['email'];
+	});
 
 	const genderOptions =[
 		{label: 'male', value: 'male'},
@@ -249,6 +252,8 @@
 				<a-form-item 
 					label="Email" 
 					name="email"
+					:validate-status="emailError.validateStatus" 
+					:help="emailError.help"
 				>
 					<a-input :disabled="isDisabledInput" placeholder="Input email" v-model:value="modelRef.email" ></a-input>
 				</a-form-item>

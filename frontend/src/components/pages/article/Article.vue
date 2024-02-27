@@ -1,47 +1,23 @@
-﻿<template >
-  <div>Hello World</div>
-</template>
+﻿<script setup lang="ts" >
+	import { computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
+	import { useRoute, useRouter } from 'vue-router'
+	import { useStore } from 'vuex'
+	import { Form } from 'ant-design-vue';
+	
+	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
+	import { ITagOption } from '@app/store/modules/article';
 
-<script >
-  export default {
-  }
-</script>
-
-<style>
-</style>
-
-
-<!-- import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Form, Input, Button, Typography, Select, Flex, Popconfirm } from 'antd'
-import { useOutletContext, useNavigate, useParams } from 'react-router-dom'
-
-import '@app/pages/userInfo/userInfo.scss'
-import { RootState, useAppDispatch } from '@app/store/store'
-import {
-	loadTagOptionsAction,
-	loadArticleAction,
-	createArticleAction,
-	updateArticleAction,
-} from '@app/store/slices/article'
-import { INotificationAction } from '@app/shared/layout/types'
-
-const { TextArea } = Input
-const { Title } = Typography
-
-const formItemLayout = {
-	labelCol: {
-		xs: { span: 24 },
-		sm: { span: 4 }
-	},
-	wrapperCol: {
-		xs: { span: 24 },
-		sm: { span: 16 }
+	interface FormState {
+		title: string;
+		tag: string;
+		content: string;
 	}
-}
 
-const tailFormItemLayout = {
-	wrapperCol: {
+	interface IProps{
+		openNotification: INotificationAction['openNotification'];
+	}
+
+	const tailWrapperCol = {
 		xs: {
 			span: 24,
 			offset: 0
@@ -51,60 +27,14 @@ const tailFormItemLayout = {
 			offset: 4
 		}
 	}
-}
 
-const Article: React.FC = () => {
-	const dispatch = useAppDispatch()
-	const tagOptions = useSelector((state: RootState) => state.article.tags)
-	const article = useSelector((state: RootState) => state.article.data)
-	const userInfo = useSelector((state: RootState) => state.userInfo.data)
-	const openNotification = useOutletContext<INotificationAction['openNotification']>()
-	const [form] = Form.useForm()
-	const navigate = useNavigate()
-	const { slug } = useParams()
-
-	useEffect(() => {
-		dispatch(loadTagOptionsAction())
-		if (slug) {
-			dispatch(loadArticleAction({ articleId: slug }))
-		}
-	}, [])
-
-	useEffect(() => {
-		if (article && slug) {
-			form.setFieldsValue({ ...article })
-		}
-	}, [article])
-
-
-	const handleRedirectToListArticle = () => {
-		navigate(`/userinfo/${userInfo?.username}?tab=articles-content`)
+	const labelCol = {
+		xs: { span: 24 },
+		sm: { span: 4 }
 	}
-
-	const handleSaveArticle = () => {
-		form.validateFields().then((values) => {
-			if(slug){
-				dispatch(
-					updateArticleAction({
-						articleId: slug,
-						title: values?.title,
-						content: Array.isArray(values?.content) ? values?.content.join('\n').trim() : (values?.content ?? ''),
-						tag: values?.tag,
-						username: userInfo?.username,
-						navigate,
-						openNotification,
-					})
-				)
-			} else{
-				dispatch(createArticleAction({ 
-					title: values?.title,
-					content: (values?.content ?? ''),
-					tag: values?.tag,
-					username: userInfo?.username,
-					openNotification,
-					navigate}))
-			}
-		})
+	const wrapperCol = {
+		xs: { span: 24 },
+		sm: { span: 16 }
 	}
 
 	const handleTitleValidator = (rule: { required: boolean }, value: string) => {
@@ -130,41 +60,129 @@ const Article: React.FC = () => {
 		}
 		return Promise.resolve()
 	}
+	const modelRef: UnwrapRef<FormState> = reactive({
+		title: '',
+		tag: '',
+		content: '',
+	});
+	const rulesRef = reactive({	title: [{ validator: handleTitleValidator }],	tag:[{ validator: handleTagValidator }], content: [{ validator: handleContentValidator }]});
+	const useForm = Form.useForm;
+	const { validate, validateInfos } = useForm(modelRef, rulesRef);
 
-	return (
-		<div className="article">
-			<Form form={form} name="article" {...formItemLayout} autoComplete="off">
-				<Form.Item label="Title" name="title" rules={[{ validator: handleTitleValidator }]}>
-					<Input />
-				</Form.Item>
+	const titleError = computed(() => {
+		return validateInfos['title'];
+	});
+	const tagError = computed(() => {
+		return validateInfos['tag'];
+	});
+	const contentError = computed(() => {
+		return validateInfos['content'];
+	});
 
-				<Form.Item label="Tag" name="tag" rules={[{ validator: handleTagValidator }]}>
-					<Select options={tagOptions} />
-				</Form.Item>
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const route = useRoute()
+	const router = useRouter()
+	const tagOptions = computed<ITagOption[]>(() => store.getters["article/getTags"])
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
 
-				<Form.Item label="Content" name="content" rules={[{ validator: handleContentValidator }]}>
-					<TextArea rows={20} />
-				</Form.Item>
+	const handleSaveArticle = () => {
+		validate().then((values) => {
+			if(route.params.slug){
+				store.dispatch('article/updateArticleAction', {
+					articleId: route.params.slug,
+					title: modelRef?.title,
+					content: Array.isArray(modelRef?.content) ? modelRef?.content.join('\n').trim() : (modelRef?.content ?? ''),
+					tag: modelRef?.tag,
+					username: userInfo.value?.username,
+					navigate: router.push,
+					openNotification: props.openNotification
+				})
+			} else{
+				store.dispatch('article/createArticleAction', {
+					title: modelRef?.title,
+					content: (modelRef?.content ?? ''),
+					tag: modelRef?.tag,
+					username: userInfo.value?.username,
+					navigate: router.push,
+					openNotification: props.openNotification,
+				})
+			}
+		})
+		.catch(err => {
+			console.log('error', err);
+			console.log(validateInfos)
+		});
+	}
 
-				<Form.Item {...tailFormItemLayout}>
-					<Flex gap="small" wrap="wrap">
-						<Popconfirm
-							title="Cохранить статью"
-							description="Вы уверены что хотите сохранить статью?"
-							onConfirm={handleSaveArticle}
-							onCancel={handleRedirectToListArticle}
-							okText="Да"
-							cancelText="Нет"
-						>
-							<Button  type="primary">
-								Сохранить
-							</Button>
-						</Popconfirm>
-					</Flex>
-				</Form.Item>
-			</Form>
+	const handleRedirectToListArticle = () => {
+		router.push({
+      name: "userInfo",
+			params: {
+        username: route.params.username
+      },
+			query: {
+				tab: 'articles-content'
+			}
+    })
+	}
+</script>
+
+<template >
+	<div class="article">
+			<a-form 
+				:labelCol="labelCol"
+				:wrapperCol="wrapperCol"
+			>
+				<a-form-item 
+					label="Title" 
+					name="title"
+					:validate-status="titleError.validateStatus" 
+					:help="titleError.help"
+				>
+					<a-input 
+						v-model:value="modelRef.title"  
+					>
+					</a-input>
+				</a-form-item>
+
+				<a-form-item 
+					label="Tag" 
+					name="tag"
+				>
+					<a-select 
+						v-model:value="modelRef.tag"
+						:options="tagOptions"
+						:validate-status="tagError.validateStatus" 
+						:help="tagError.help"
+					></a-select>
+				</a-form-item>
+
+				<a-form-item 
+					label="Content" 
+					name="content"
+				>
+					<a-textarea 
+						v-model:value="modelRef.content"
+						:autoSize="{ minRows: 20}"
+						:validate-status="contentError.validateStatus" 
+						:help="contentError.help"
+					></a-textarea>
+				</a-form-item>
+
+				<a-form-item :wrapperCol="tailWrapperCol" >
+					<a-popconfirm
+						title="Вы уверены что хотите сохранить статью?"
+						@confirm="handleSaveArticle"
+						@cancel="handleRedirectToListArticle"
+						okText="Да"
+						cancelText="Нет"
+					>
+						<a-button type="primary" >
+							Сохранить
+						</a-button>
+					</a-popconfirm>
+				</a-form-item>
+			</a-form>
 		</div>
-	)
-}
-
-export default Article -->
+</template>

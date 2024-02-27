@@ -12,12 +12,13 @@
 			<a-col :span="1"></a-col>
 			<a-col :span="16">Feeds</a-col>
 			<a-col :span="1"></a-col>
-			<a-col :span="6">PopularTags</a-col>
+			<a-col :span="6"><app-popular-tags :page="1" :limit="10"></app-popular-tags></a-col>
 		</a-row>
 	</div>
 </template>
 
 <script setup lang="ts">
+import AppPopularTags from "@app/pages/home/components/PopularTags.vue";	
 </script>
 
 <style lang="scss">
