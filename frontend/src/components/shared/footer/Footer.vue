@@ -1,8 +1,10 @@
 ﻿<template >
-	<div className="footer">
-		<div className="footer__wrapper">
-			<a-typography-text className="footer__text">Copyright &copy;{{year}} Designed by Valentin Zadorozhniy{{' '}}</a-typography-text>
-			<a href="https://t.me/Shalfei"><a-logo class="footer__icon"></a-logo></a>
+		<div v-if="isShowFooter">
+			<div className="footer">
+			<div className="footer__wrapper">
+				<a-typography-text className="footer__text">Copyright &copy;{{year}} Designed by Valentin Zadorozhniy{{' '}}</a-typography-text>
+				<a href="https://t.me/Shalfei"><a-logo class="footer__icon"></a-logo></a>
+			</div>
 		</div>
 	</div>
 </template>
@@ -11,7 +13,9 @@
 	import moment from 'moment'
 	import ALogo from '@app/shared/footer/svg/telegramm.svg';
 	import { computed } from 'vue';
-
+import { useRoute } from 'vue-router';
+	const router = useRoute();
+	const isShowFooter = computed<boolean>(() => router.path === '/')
 	const year = computed(() => moment().year())
 </script>
 

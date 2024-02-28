@@ -14,8 +14,7 @@
 		type: NoticeType
 	}
 
-	const router = useRoute();
-	const isShowFooter = computed<boolean>(() => router.path === '/')
+
 	const openNotification = ({type, content}: INotification) => {
 		message.open({
 			type: type,
@@ -27,7 +26,5 @@
 <template >
 	<app-menu :openNotification="openNotification"></app-menu>
 	<router-view :openNotification="openNotification"></router-view>
-	<div v-if="isShowFooter">
-		<app-footer></app-footer>	
-	</div>
+	<app-footer></app-footer>	
 </template>

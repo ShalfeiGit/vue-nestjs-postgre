@@ -1,132 +1,173 @@
-﻿<template >
-  <div>Hello World</div>
-</template>
+﻿<script setup lang="ts">
+	import { IUserInfo } from '@app/store/modules/userInfo';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
+	import { useRouter } from 'vue-router';
+	import { StarOutlined } from '@ant-design/icons-vue';
+	export interface IFeedArticle {
+		articleId: number;
+		authorName: string;
+		authorId: number;
+		authorAvatar: string;
+		createdAt: string;
+		title: string;
+		content: string[];	
+		likes: number;
+		liked: boolean;
+	}
+	export interface IFeedPagination {
+		totalItems: number;
+		itemsPerPage: number;
+		currentPage: number;	
+	}
 
-<script >
-  export default {
-  }
-</script>
-
-<style>
-</style>
-
-
-<!-- // import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons'
-import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { Avatar, Divider, Space, Typography, Pagination, Image, Button } from 'antd'
-import { StarOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
-
-import { RootState, useAppDispatch } from '@app/store/store'
-import { IUserInfo } from '@app/store/slices/userInfo'
-import '@app/pages/home/components/feedArticles.scss'
-import { likeArticleAction, loadAllArticlesAction, loadGroupArticlesAction } from '@app/store/slices/article'
-
-const {Title, Text, Link} = Typography
-
-const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-	<Space>
-		{React.createElement(icon)}
-		{text}
-	</Space>
-)
-
-interface IFeedArticle {
-	articleId: number;
-	authorName: string;
-	authorAvatar: string;
-	authorId: number
-	createdAt: string;
-	title: string;
-	content: string[];
-	likes: number;
-	liked: boolean;
-}
-
-interface IPagination {
-	totalItems: number;
-	itemsPerPage: number;
-	currentPage: number;
-}
-
-interface IProps {
-	feedArticles: IFeedArticle[],
-	tag: string,
-	pagination: IPagination
-}
-
-const FeedArticles: React.FC<IProps> = ({feedArticles, pagination, tag}) => {
-	const dispatch = useAppDispatch()
-	const navigate = useNavigate()
-	const userInfo = useSelector((state: RootState) => state.userInfo.data)
+	interface IProps{
+		feedArticles: IFeedArticle[];
+		pagination: IFeedPagination;
+		tag: string;
+	}
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const router = useRouter()
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
 
 	const handlePaginationFeeds = (page) => {
-		dispatch(tag === 'global'
-			? loadAllArticlesAction({page, limit: pagination.itemsPerPage}) 
-			: loadGroupArticlesAction({tag, page, limit: pagination.itemsPerPage}))
+		props.tag === 'global' 
+			? store.dispatch('article/loadAllArticlesAction', {page, limit: props.pagination.itemsPerPage}) 
+			: store.dispatch('article/loadGroupArticlesAction', {tag: props.tag, page, limit: props.pagination.itemsPerPage})
 	}
-	const handleReadArticle = (slug) => () => {
-		navigate(`/article/preview/${slug}`)
+	const handleReadArticle = (slug) => {
+		router.push({
+      name: "previewArticle",
+			params: {
+        slug
+      },
+    })
 	}
-	const handleLikeArticle = (feedArticle) => () => {
+	const handleLikeArticle = (feedArticle) => {
 		if(!userInfo) return
-		const likes = (userInfo.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
+		const m = (userInfo.value?.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
+		const m1 = userInfo.value?.likedArticle 
+		const m2 = feedArticle?.articleId
+
+		const likes = (userInfo.value?.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
 			? feedArticle?.likes - 1
 			: feedArticle?.likes + 1
-		dispatch(likeArticleAction({
-			username: userInfo?.username,
+		store.dispatch('article/likeArticleAction', {
+			username: userInfo.value?.username,
 			articleId: feedArticle?.articleId,
-			likes: (userInfo.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
-				? feedArticle?.likes - 1
-				: feedArticle?.likes + 1,
-			tag,
-			page: pagination.currentPage,
-			limit: pagination.itemsPerPage}))
+			likes,
+			tag: props.tag,
+			page: props.pagination.currentPage,
+			limit: props.pagination.itemsPerPage
+		})
 	}
+</script>
 
-	return (
-		<div className='feed-articles'>
-			{feedArticles.map((feedArticle, i) => (
-				<div key={i} className='feed-articles__item'>
-					<div className='feed-articles__header'>
-						<div className='feed-articles__userinfo'>
-							<div><Avatar shape="circle" src={feedArticle?.authorAvatar ? `http://localhost:3000${feedArticle?.authorAvatar}` : `https://api.dicebear.com/7.x/miniavs/svg?seed=${feedArticle?.authorId}`} /></div>
-							<div className='feed-articles__userinfo-content'>
-								<NavLink to={`/userinfo/${feedArticle.authorName}`}  >
-									{feedArticle.authorName}
-								</NavLink>
-								<Text type="secondary">Date: {feedArticle?.createdAt}</Text>
-							</div>
-						</div>
-						<Button disabled={!userInfo} onClick={handleLikeArticle(feedArticle)}>
-							<span className={`feed-articles__stars${feedArticle.liked ? '_liked' : '' }`}>
-								<IconText icon={StarOutlined} text={`${feedArticle.likes}`} key="list-vertical-star-o" />
-							</span>
-						</Button>
+<template>
+	<div class='feed-articles'>
+		<div v-for="feedArticle, i in props.feedArticles" :key="i" class='feed-articles__item'>
+			<div class='feed-articles__header'>
+				<div class='feed-articles__userinfo'>
+					<div>
+						<a-avatar shape="circle" :src="feedArticle?.authorAvatar
+							? `http://localhost:3000${feedArticle?.authorAvatar}` 
+							: `https://api.dicebear.com/7.x/miniavs/svg?seed=${feedArticle?.authorId}`"
+						/>
 					</div>
-					<Title level={4}>{feedArticle.title}</Title>
-					<div className='feed-articles__article'>
-						<div className='feed-articles__article_gradient' />
-						<Text>{feedArticle.content.map((text, i) => <p className='feed-articles__article_text' key={i}>{text}</p>)}</Text>
+					<div class='feed-articles__userinfo-content'>
+						<router-link :to="{ name: 'userInfo', params: { username: feedArticle?.authorName }, query: {tab: 'user-content'}}">
+							{{feedArticle.authorName}}
+						</router-link>
+						<a-typography-text type="secondary" >Date: {{feedArticle?.createdAt}}</a-typography-text>
 					</div>
-					<Button className='feed-articles__read-more' type="text" onClick={handleReadArticle(feedArticle.articleId)}>
-						Read more...
-					</Button>
-					<Divider />
 				</div>
-			))}
-			<div className='feed-articles__pagination'>
-				{feedArticles.length > 0 ? (
-					<Pagination current={pagination.currentPage} onChange={handlePaginationFeeds} total={pagination.totalItems} />
-				) : (
-					<div className='feed-articles__item'>
-						<Title level={4}>Не найдены статьи по данной тематике</Title>
-					</div>
-				)}
+				<a-button :disabled="!userInfo" @click="handleLikeArticle(feedArticle)">
+					<span :class="`feed-articles__stars${feedArticle?.liked ? '_liked' : '' }`">
+						<a-space>
+							<StarOutlined />
+							{{`${feedArticle.likes}`}}
+						</a-space>
+					</span>
+				</a-button>
+			</div>
+			<a-typography-title :level="4">{{feedArticle?.title}}</a-typography-title>
+			<div class='feed-articles__article'>
+				<div class='feed-articles__article_gradient'></div>
+				<a-typography-text v-for="text, i in feedArticle.content">
+					<p class='feed-articles__article_text' :key="i">{{text}}</p>
+				</a-typography-text>
+			</div>
+			<a-button class='feed-articles__read-more' type="text" @click="handleReadArticle(feedArticle.articleId)">
+				Read more...
+			</a-button>
+			<a-divider />
+		</div>
+		<div class='feed-articles__pagination'>
+			<div v-if="feedArticles.length > 0">
+				<a-pagination :current="pagination.currentPage" @change="handlePaginationFeeds" :total="pagination.totalItems" /></div>
+			<div v-else="">
+				<a-typography-title :level="4">Не найдены статьи по данной тематике</a-typography-title>
 			</div>
 		</div>
-	)}
+	</div>
+</template>
 
-export default FeedArticles -->
+<style lang="scss">
+	@import '@app/app.scss';
+
+	.feed-articles{
+		&__header{
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+		&__stars_liked{
+			border: 1px $blue-color solid;
+			border-radius: 5px;
+			padding-left: 4px;
+			padding-right: 4px;
+			padding-bottom: 1px;
+			color: $blue-color;
+		}
+		&__userinfo{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+	
+			&-content{
+				margin-left: 8px;
+				display: flex;
+				flex-direction: column;
+				& h5{
+					margin-bottom: 0;
+				}
+			}
+		}
+		&__article{
+			max-height: 150px;
+			overflow: hidden;
+			position: relative;
+		}
+		&__pagination{
+			display: flex;
+			justify-content: center;
+		}
+		&__article_gradient{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(transparent, white);
+		}
+		&__read-more{
+			color: $blue-color !important;
+		}
+		&__article_text{
+			text-indent: 20px
+		}
+		&__grade{
+			cursor: pointer
+		}
+	}
+</style>
+

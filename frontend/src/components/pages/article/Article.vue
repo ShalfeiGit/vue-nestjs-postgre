@@ -1,11 +1,11 @@
 ﻿<script setup lang="ts" >
-	import { computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
+	import { computed, onMounted, reactive, UnwrapRef, watch } from 'vue';
 	import { useRoute, useRouter } from 'vue-router'
 	import { useStore } from 'vuex'
 	import { Form } from 'ant-design-vue';
 	
 	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
-	import { ITagOption } from '@app/store/modules/article';
+	import { IArticle, ITagOption } from '@app/store/modules/article';
 
 	interface FormState {
 		title: string;
@@ -84,7 +84,8 @@
 	const route = useRoute()
 	const router = useRouter()
 	const tagOptions = computed<ITagOption[]>(() => store.getters["article/getTags"])
-	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
+	const articleInfo = computed<IArticle>(() => store.getters["article/getArticleInfo"])			
 
 	const handleSaveArticle = () => {
 		validate().then((values) => {
@@ -126,6 +127,20 @@
 			}
     })
 	}
+
+	onMounted(() => {
+		if(route.params.slug) {
+			store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
+		}
+	})
+	watch(() => articleInfo.value, () => {
+		if(articleInfo.value && route.params.slug) {
+			modelRef.title = articleInfo.value?.title
+			modelRef.tag =  articleInfo.value?.tag
+			modelRef.content = (articleInfo.value?.content ?? []).join('\n')
+		}
+	},
+  {deep: true, immediate: true})
 </script>
 
 <template >
@@ -149,24 +164,24 @@
 				<a-form-item 
 					label="Tag" 
 					name="tag"
+					:validate-status="tagError.validateStatus" 
+					:help="tagError.help"
 				>
 					<a-select 
 						v-model:value="modelRef.tag"
 						:options="tagOptions"
-						:validate-status="tagError.validateStatus" 
-						:help="tagError.help"
 					></a-select>
 				</a-form-item>
 
 				<a-form-item 
 					label="Content" 
 					name="content"
+					:validate-status="contentError.validateStatus" 
+					:help="contentError.help"
 				>
 					<a-textarea 
 						v-model:value="modelRef.content"
 						:autoSize="{ minRows: 20}"
-						:validate-status="contentError.validateStatus" 
-						:help="contentError.help"
 					></a-textarea>
 				</a-form-item>
 

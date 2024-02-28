@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-	import { ref, h } from 'vue';
+	import { ref, h, watch } from 'vue';
 	import { TabsProps } from 'antd'
 	import { useRouter, useRoute } from 'vue-router'
 
@@ -14,16 +14,22 @@
 	const router = useRouter()
 	const route = useRoute()
   const tabQuery = ref('user-content');		
+
+	watch(() => route.params.query,
+    async () => {
+			tabQuery.value = route.query?.tab as string
+    },
+    {deep: true, immediate: true})
 	const tabs = ref<TabsProps['items']>([
 		{
 			key: 'user-content',
 			label: 'User Info',
-			children: h(UserContent, { openNotification: props.openNotification}),
+			children: h(UserContent, { openNotification: props.openNotification, key: 'user-content'}),
 		},
 		{
 			key: 'articles-content',
 			label: 'Articles Info',
-			children: h(ArticleContent, { openNotification: props.openNotification}),
+			children: h(ArticleContent, { openNotification: props.openNotification, key: 'user-content'}),
 		}
 	])
 	const handleChangeTab = (activeKey) => {

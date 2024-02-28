@@ -413,7 +413,7 @@ const moduleArticle = {
 	 	},
 		async loadGroupArticlesAction({ commit, dispatch }, payload){
 			const {tag, page, limit} = payload
-			const response: IAxiosResponse<IGroupArticle<IArticle>> & IAxiosErrorResponse = await api({ method: 'get', url: `article/global/${tag}?page=${page}&limit=${limit}` })
+			const response: IAxiosResponse<IGroupArticle<IArticle>> & IAxiosErrorResponse = await api({ method: 'get', url: `article/group/${tag}?page=${page}&limit=${limit}` })
 			if(response.status >= 400){
 				return commit('loadGroupArticlesAction_rejected', response)
 			}	else {
@@ -510,14 +510,7 @@ const moduleArticle = {
 			if(response.status >= 400){
 				return commit('deleteArticleAction_rejected', response)
 			}	else {
-				navigate(`/userinfo/${username}?tab=articles-content`)
-				return commit('updateArticleAction_fulfilled', {
-					...responseUserArticles,
-					data: {
-						username,
-						articles: responseUserArticles.data
-					}
-				})
+				dispatch('loadUserArticlesAction', { username, page: 1, limit : 10 })
 			}
 		},
 		async likeArticleAction({ commit, dispatch }, payload){
@@ -527,9 +520,9 @@ const moduleArticle = {
 			if(responseUserInfo.status >= 400){
 				return commit('likeArticleAction_rejected', responseUserInfo)
 			}	else {
-				return commit('likeArticleAction_rejected', {
+				dispatch('userInfo/likeArticleByUserAction', responseUserInfo, {root:true})
+				return commit('likeArticleAction_fulfilled', {
 					...responseGroupArticles,
-					user: responseUserInfo.data,
 					data: { tag,
 						articles: responseGroupArticles.data
 					}
@@ -538,6 +531,9 @@ const moduleArticle = {
 		}
 	},
 	getters: { 
+		getArticleInfo: (state) => {
+			return state?.data
+		},
 		getUserArticles: (state) => {
 			return state?.userArticles
 		},

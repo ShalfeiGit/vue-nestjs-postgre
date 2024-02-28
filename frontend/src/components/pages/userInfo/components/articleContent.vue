@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { computed, reactive, UnwrapRef, onMounted, toRaw, h } from 'vue';
+	import { computed, h, watch } from 'vue';
 	import ArticleText from '@app/pages/userInfo/components/articleText.vue';
 	import ArticleManage from '@app/pages/userInfo/components/articleManage.vue';
 	import { PlusOutlined } from '@ant-design/icons-vue';
@@ -8,7 +8,7 @@
 	import { TableProps } from 'ant-design-vue';
 	
 	import { INotificationAction, IUserInfo } from '@app/store/modules/userInfo'
-	import { IArticle, IUserArticle } from '@app/store/modules/article';
+	import { IArticle, IPagnationMeta, IUserArticle } from '@app/store/modules/article';
 	import { PaginationConfig } from 'ant-design-vue/es/pagination';
 
 	interface IProps{
@@ -26,8 +26,12 @@
 	const store = useStore()
 	const route = useRoute()
 	const router = useRouter()
-	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])		
-	const userArticles = computed<IUserArticle<IArticle>[]>(() => store.getters["article/getUserArticles"])	
+	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
+	const paginationInfo = computed<IPagnationMeta>(() => (store.getters["article/getUserArticles"].find(userArticle => userArticle?.username === route.params.username)?.articles?.meta ?? []))
+	const data = computed<IUserArticle<IArticle>[]>(() => (store.getters["article/getUserArticles"].find(userArticle => userArticle?.username === route.params.username)?.articles?.items ?? []).map(article => ({
+		key: `${article.id}`,
+		...article
+	})))	
 	
 	const handleAddArticle = () => {
 		router.push({
@@ -104,26 +108,23 @@
 		}
 	]
 
-	const data: DataType[] =  (userArticles.value.find(userArticle => userArticle?.username === route.params.username)?.articles?.items ?? []).map(article => ({
-		key: `${article.id}`,
-		...article
-	}))
-
 	const pagination =  computed<PaginationConfig>(() => ({
 		onChange: handleChangeArticlePagination,
-		pageSize: pagination?.itemsPerPage ?? 10,
+		pageSize: paginationInfo.value?.itemsPerPage ?? 10,
 		showSizeChanger: false,
 		showQuickJumper: false,
-		total: pagination?.totalItems ?? 0,
-		current: pagination?.currentPage?? 1
+		total: paginationInfo.value?.totalItems ?? 0,
+		current: paginationInfo.value?.currentPage?? 1
 	}
-) ) 
-	onMounted(async () => {
-		if(userInfo.value?.username !==  route.params.username){
-			await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
-		}
-		await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
-	})
+	)) 
+	watch(() => route.params.username,
+    async () => {
+			if(userInfo.value?.username !== route.params.username){
+				await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
+			} 
+			await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
+    },
+    {deep: true, immediate: true})
 </script>
 
 <template >

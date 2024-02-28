@@ -254,8 +254,7 @@ const moduleUserInfo = {
 		},
 
 		async likeArticleByUserAction({ commit, dispatch }, payload: IAxiosResponse<IArticle> & IAdditionalArticleInfo & ILikeArticleResponse){
-			const {user} = payload
-			return commit('likeArticleByUserAction_fulfilled', user)
+			return commit('updateUserInfoAction_fulfilled', payload)
  		},
 	},
 	getters: { 

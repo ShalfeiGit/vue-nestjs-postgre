@@ -57,7 +57,11 @@ const moduleOtherAuthorInfo = {
 			return commit('getOtherAuthorInfoAction_fulfilled', response)
 		}
 	},
-	// getters: { ... }
+	getters: { 
+		getOtherAuthorInfo: (state) => {
+			return state?.data
+		}
+	 }
 }
 
 export default moduleOtherAuthorInfo

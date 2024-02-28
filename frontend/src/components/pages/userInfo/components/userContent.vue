@@ -1,5 +1,5 @@
 <script setup lang="ts" >
-	import { computed, reactive, UnwrapRef, onMounted, toRaw } from 'vue';
+	import { computed, reactive, UnwrapRef, onMounted, toRaw, watch } from 'vue';
 	import { useRoute, useRouter } from 'vue-router'
 	import { useStore } from 'vuex'
 	import { Form, UploadFile } from 'ant-design-vue';
@@ -18,6 +18,7 @@
 
 	interface IProps{
 		openNotification: INotificationAction['openNotification'];
+		key: string;
 	}
 
 	const labelCol = {
@@ -182,13 +183,13 @@
 			console.log('error', err);
 		});
 	}
-	onMounted(async () => {
-		resetFields()
-		if(userInfo.value?.username !== route.params.username){
-			await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
-		} 
-		await store.dispatch('article/loadUserArticlesAction', {username: route.params.username, page: 1, limit: 10})
-		const matchUser = userInfo.value?.username === route.params.username
+	watch(() => route.params.username,
+    async () => {
+			resetFields()
+			if(userInfo.value?.username !== route.params.username){
+				await store.dispatch('otherAuthorInfo/getOtherAuthorInfoAction', {username: route.params.username})
+			} 
+			const matchUser = userInfo.value?.username === route.params.username
 			if(userInfo.value?.avatarUrl){
 				uploadOptions.image = `http://localhost:3000${matchUser ? userInfo.value?.avatarUrl : otherAuthorInfo.value?.avatarUrl}`,
 				uploadOptions.showPreview = true,
@@ -208,7 +209,8 @@
 			modelRef.bio = matchUser ? userInfo.value?.bio : otherAuthorInfo.value?.bio
 			modelRef.age = matchUser ? userInfo.value?.age : otherAuthorInfo.value?.age
 			modelRef.gender = matchUser ? userInfo.value?.gender : otherAuthorInfo.value?.gender
-	})
+    },
+    {deep: true, immediate: true})
 </script>
 
 <template >

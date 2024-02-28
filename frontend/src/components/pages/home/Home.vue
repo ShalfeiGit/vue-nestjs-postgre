@@ -10,7 +10,7 @@
 		</div>
 		<a-row>
 			<a-col :span="1"></a-col>
-			<a-col :span="16">Feeds</a-col>
+			<a-col :span="16"><app-feeds></app-feeds></a-col>
 			<a-col :span="1"></a-col>
 			<a-col :span="6"><app-popular-tags :page="1" :limit="10"></app-popular-tags></a-col>
 		</a-row>
@@ -18,7 +18,14 @@
 </template>
 
 <script setup lang="ts">
-import AppPopularTags from "@app/pages/home/components/PopularTags.vue";	
+	import AppPopularTags from "@app/pages/home/components/PopularTags.vue";	
+	import AppFeeds from "@app/pages/home/components/Feeds.vue";	
+	import { INotificationAction } from "@app/store/modules/userInfo";
+	
+	interface IProps{
+		openNotification: INotificationAction['openNotification'];
+	}
+	const props = defineProps<IProps>()
 </script>
 
 <style lang="scss">
