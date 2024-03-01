@@ -46,10 +46,6 @@
 	}
 	const handleLikeArticle = (feedArticle) => {
 		if(!userInfo) return
-		const m = (userInfo.value?.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
-		const m1 = userInfo.value?.likedArticle 
-		const m2 = feedArticle?.articleId
-
 		const likes = (userInfo.value?.likedArticle ?? []).some(article => `${article.id}` === `${feedArticle?.articleId}`) 
 			? feedArticle?.likes - 1
 			: feedArticle?.likes + 1

@@ -129,11 +129,11 @@ const labelCol = {
 					:validate-status="passError.validateStatus" 
 					:help="passError.help"
 				>
-					<a-input
+					<a-input-password
 						placeholder="Input password"
 						v-model:value="modelRef.pass"  
 					>
-					</a-input>
+					</a-input-password>
 				</a-form-item>
 				<a-form-item 
 					label="Remember me" 

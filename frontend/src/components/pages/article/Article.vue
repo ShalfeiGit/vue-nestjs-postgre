@@ -67,7 +67,7 @@
 	});
 	const rulesRef = reactive({	title: [{ validator: handleTitleValidator }],	tag:[{ validator: handleTagValidator }], content: [{ validator: handleContentValidator }]});
 	const useForm = Form.useForm;
-	const { validate, validateInfos } = useForm(modelRef, rulesRef);
+	const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef);
 
 	const titleError = computed(() => {
 		return validateInfos['title'];
@@ -84,6 +84,7 @@
 	const route = useRoute()
 	const router = useRouter()
 	const tagOptions = computed<ITagOption[]>(() => store.getters["article/getTags"])
+	const articleInfo = computed<IArticle>(() => store.getters["article/getArticleInfo"])
 	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
 
 	const handleSaveArticle = () => {
@@ -127,14 +128,15 @@
     })
 	}
 
-	onMounted(() => {
-		if(route.params.slug) {
-			store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
-		}
-	})
 	watch(() => route.params.username,
     async () => {
-			store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
+			resetFields()
+			if(route.params.slug) {
+				await store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
+				modelRef.title = articleInfo.value?.title
+				modelRef.tag =  articleInfo.value?.tag
+				modelRef.content =  articleInfo.value?.content.join('\n')
+			}
     },
     {deep: true, immediate: true})
 </script>

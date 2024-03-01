@@ -11,7 +11,4 @@
     padding: 0;
   }
 
-  // .ant-tabs {
-  //   height: 100% !important;
-  // }
 </style>

@@ -121,7 +121,7 @@ const labelCol = {
 		validate().then((values) => {
 			store.dispatch('userInfo/signUpAction', {
 				username: modelRef?.username,
-				email: modelRef?.pass,
+				email: modelRef?.email,
 				pass: modelRef?.pass,
 				navigate: router.push,
 				openNotification: props.openNotification

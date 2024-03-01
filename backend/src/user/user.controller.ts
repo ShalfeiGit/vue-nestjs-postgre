@@ -80,9 +80,12 @@ export class UserController {
     @Body() body: updateUserDto,
   ): Promise<Omit<User, 'pass'>> {
     const searchedUser = await this.userService.getUser(username);
-    const { avatar, ext, avatarDate, ...userInfo } = body;
-    const uploadPath = resolve(__dirname, '../../../frontend//dist/avatars');
+    const { avatar, ext, avatarDate, avatarUrl, ...userInfo } = body;
+    const uploadPath = resolve(__dirname, '../../../frontend/dist/avatars');
     if (avatar && ext && avatarDate) {
+      if (!existsSync(uploadPath)) {
+        mkdirSync(uploadPath);
+      }
       readdirSync(uploadPath)
         .filter((path) => {
           if (`${path}`.indexOf(`${searchedUser.username}-`) >= 0) {
@@ -98,9 +101,6 @@ export class UserController {
       const response = { type: null, data: null };
       response.type = matches[1];
       response.data = Buffer.from(matches[2], 'base64');
-      if (!existsSync(uploadPath)) {
-        mkdirSync(uploadPath);
-      }
       await sharp(response.data)
         .resize(600, 600)
         .toFile(`${uploadPath}/${username}-${avatarDate}.${ext}`);
@@ -114,7 +114,9 @@ export class UserController {
       avatarUrl:
         avatar && ext && avatarDate
           ? `/avatars/${username}-${avatarDate}.${ext}`
-          : null,
+          : avatarUrl
+            ? avatarUrl
+            : null,
       username,
       pass: searchedUser.pass,
     });
@@ -135,6 +137,9 @@ export class UserController {
     const { avatar, ext, avatarDate } = body;
     const searchedUser = await this.userService.getUser(username);
     const uploadPath = resolve(__dirname, '../../../frontend/dist/avatars');
+    if (!existsSync(uploadPath)) {
+      mkdirSync(uploadPath);
+    }
     readdirSync(uploadPath)
       .filter((path) => {
         if (`${searchedUser?.avatarUrl}`.replace('/avatars/', '') === path) {
@@ -154,9 +159,7 @@ export class UserController {
     const response = { type: null, data: null };
     response.type = matches[1];
     response.data = Buffer.from(matches[2], 'base64');
-    if (!existsSync(uploadPath)) {
-      mkdirSync(uploadPath);
-    }
+
     await sharp(response.data)
       .resize(600, 600)
       .toFile(`${uploadPath}/${username}-${avatarDate}.${ext}`);
