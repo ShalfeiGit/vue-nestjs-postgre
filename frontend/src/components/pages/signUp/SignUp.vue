@@ -1,41 +1,22 @@
-﻿<template >
-  <div>Hello World</div>
-</template>
+﻿<script setup lang="ts">
+import { INotificationAction } from '@app/store/modules/userInfo';
+import { Form } from 'ant-design-vue';
+import { computed, reactive, UnwrapRef } from 'vue';
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-<script >
-  export default {
-  }
-</script>
-
-<style>
-</style>
-
-
-
-<!-- import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { Form, Input, Button, Typography } from 'antd'
-import { useOutletContext, useNavigate } from 'react-router-dom'
-
-import '@app/pages/signUp/signUp.scss'
-import { useAppDispatch } from '@app/store/store'
-import { signUpAction } from '@app/store/slices/userInfo'
-
-const { Title } = Typography
-
-const formItemLayout = {
-	labelCol: {
-		xs: { span: 24 },
-		sm: { span: 4 }
-	},
-	wrapperCol: {
-		xs: { span: 24 },
-		sm: { span: 16 }
-	}
+interface FormState {
+	username: string,
+	email: string,
+	pass: string,
+	repeatPass: string,
 }
 
-const tailFormItemLayout = {
-	wrapperCol: {
+interface IProps{
+	openNotification: INotificationAction['openNotification'];
+}
+
+const tailWrapperCol = {
 		xs: {
 			span: 24,
 			offset: 0
@@ -45,19 +26,25 @@ const tailFormItemLayout = {
 			offset: 4
 		}
 	}
-}
 
-const SignUp: React.FC = () => {
-	const dispatch = useAppDispatch()
-	const openNotification = useOutletContext()
-	const [form] = Form.useForm()
-	const navigate = useNavigate()
-	const handleSubmitForm = () => {
-		form.validateFields().then((values) => {
-			const {repeatPass, ...data} = values
-			dispatch(signUpAction({...data, openNotification, navigate }))
-		})
+const labelCol = {
+		xs: { span: 24 },
+		sm: { span: 4 }
 	}
+	const wrapperCol = {
+		xs: { span: 24 },
+		sm: { span: 16 }
+	}
+	const modelRef: UnwrapRef<FormState> = reactive({
+		username: '',
+		email: '',
+		pass: '',
+		repeatPass: '',
+	});
+
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const router = useRouter()
 
 	const handleUsernameValidator = (rule: { required: boolean }, value: string) => {
 		if(rule?.required && (!value || !value.trim())){
@@ -102,74 +89,133 @@ const SignUp: React.FC = () => {
 		if(rule?.required && (!value || !value.trim())){
 			return Promise.reject(new Error('Field must not be empty'))
 		}
-		if(form.getFieldValue('pass') !== value){
+		if(modelRef.pass !== value){
 			return Promise.reject(new Error('Password fields must be the same'))
 		}
 		return Promise.resolve()
 	}
 
-	return (
-		<div className="signup">
-			<Title className={'signup__text'}>Sign Up</Title>
-			<NavLink to={'/signin'} className={'signin__link-title'}>
-				Have an account?
-			</NavLink>
-			<Form
-				form={form}
-				name="signup"
-				{...formItemLayout}
-				initialValues={{ remember: true }}
-				onFinish={handleSubmitForm}
-				autoComplete="off"
+	const rulesRef = reactive({	
+		username: [{ validator: handleUsernameValidator }],	
+		email:[{ validator: handleEmailValidator }], 
+		pass:[{ validator: handlePasswordValidator }], 
+		repeatPass:[{ validator: handleRepeatPasswordValidator }], 
+	});
+
+	const useForm = Form.useForm;
+	const { validate, validateInfos } = useForm(modelRef, rulesRef);
+
+	const usernameError = computed(() => {
+		return validateInfos['username'];
+	});
+	const emailError = computed(() => {
+		return validateInfos['email'];
+	});
+	const passError = computed(() => {
+		return validateInfos['pass'];
+	});
+	const repeatPassError = computed(() => {
+		return validateInfos['repeatPass'];
+	});
+	const handleSubmitForm = () => {
+		validate().then((values) => {
+			store.dispatch('userInfo/signUpAction', {
+				username: modelRef?.username,
+				email: modelRef?.pass,
+				pass: modelRef?.pass,
+				navigate: router.push,
+				openNotification: props.openNotification
+			})
+		})
+		.catch(err => {
+			console.log('error', err);
+			console.log(validateInfos)
+		});
+	}
+</script>
+
+<template >
+  <div class="signup">
+		<a-typography-title class='signup__text'>Sign In</a-typography-title>
+		<router-link class="signup__link-title" :to="{ name: 'signIn' }">
+			Have an account?
+		</router-link>
+		<a-form 
+				:labelCol="labelCol"
+				:wrapperCol="wrapperCol"
 			>
-				<Form.Item 
-					hasFeedback
+			<a-form-item 
 					label="Username" 
-					name="username" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator:handleUsernameValidator }]}
+					name="username"
+					:validate-status="usernameError.validateStatus" 
+					:help="usernameError.help"
 				>
-					<Input placeholder="Input username" />
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
+					<a-input 
+						placeholder="Input username"
+						v-model:value="modelRef.username"  
+					>
+					</a-input>
+				</a-form-item>
+				<a-form-item 
 					label="Email" 
-					name="email" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator:handleEmailValidator }]}
+					name="email"
+					:validate-status="emailError.validateStatus" 
+					:help="emailError.help"
 				>
-					<Input placeholder="Input email" />
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
-					label="Pass" 
-					name="pass" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator: handlePasswordValidator }]}
+					<a-input 
+						placeholder="Input email"
+						v-model:value="modelRef.email"  
+					>
+					</a-input>
+				</a-form-item>
+				<a-form-item 
+					label="Password" 
+					name="pass"
+					:validate-status="passError.validateStatus" 
+					:help="passError.help"
 				>
-					<Input.Password placeholder="Input password" autoComplete='on'/>
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
+					<a-input-password 
+						placeholder="Input password"
+						v-model:value="modelRef.pass"  
+					>
+					</a-input-password>
+				</a-form-item>
+				<a-form-item 
 					label="Repeat password" 
 					name="repeatPass"
-					validateDebounce={1000}
-					rules={[{ required: true, validator: handleRepeatPasswordValidator }]}
+					:validate-status="repeatPassError.validateStatus" 
+					:help="repeatPassError.help"
 				>
-					<Input.Password placeholder="Input password" autoComplete='on'/>
-				</Form.Item>
+					<a-input-password
+						placeholder="Input password"
+						v-model:value="modelRef.repeatPass"  
+					>
+					</a-input-password>
+				</a-form-item>
+				<a-form-item :wrapperCol="tailWrapperCol" >
+					<a-button type="primary"  @click="handleSubmitForm" >
+						Сохранить
+					</a-button>
+				</a-form-item>
+		</a-form>
+	</div>
+</template>
 
-				<Form.Item {...tailFormItemLayout}>
-					<Button type="primary" htmlType="submit">
-						Submit
-					</Button>
-				</Form.Item>
-			</Form>
-		</div>
-	)
-}
+<style lang="scss">
+	@import '@app/app.scss';
 
-export default SignUp -->
+	.signup{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		& form {
+			width: 100%;
+			max-width: 800px;
+		}
+		&__link-title{
+			color: $blue-color;
+			text-decoration: none;
+			font-size: 16px;
+		}
+	}
+</style>

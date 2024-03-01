@@ -99,7 +99,13 @@ const moduleUserInfo = {
 		},
 		signInAction_fulfilled (state, payload) {
 			const {data, status, statusText, headers, config}  = <IAxiosResponse<IUserInfo>>payload ?? {}
-			const {refresh_token, ...updatedDate}  = data
+			let updatedDate
+			if(data?.refresh_token){
+				const {refresh_token, ...payloadUpdatedDate}  = data
+				updatedDate = payloadUpdatedDate
+			} else {
+				updatedDate = data
+			}
 			state.data = updatedDate
 			state.error = null
 			state.status = status

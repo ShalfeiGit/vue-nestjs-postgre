@@ -85,7 +85,6 @@
 	const router = useRouter()
 	const tagOptions = computed<ITagOption[]>(() => store.getters["article/getTags"])
 	const userInfo = computed<IUserInfo>(() => store.getters["userInfo/getUserInfo"])
-	const articleInfo = computed<IArticle>(() => store.getters["article/getArticleInfo"])			
 
 	const handleSaveArticle = () => {
 		validate().then((values) => {
@@ -133,14 +132,11 @@
 			store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
 		}
 	})
-	watch(() => articleInfo.value, () => {
-		if(articleInfo.value && route.params.slug) {
-			modelRef.title = articleInfo.value?.title
-			modelRef.tag =  articleInfo.value?.tag
-			modelRef.content = (articleInfo.value?.content ?? []).join('\n')
-		}
-	},
-  {deep: true, immediate: true})
+	watch(() => route.params.username,
+    async () => {
+			store.dispatch('article/loadArticleAction', { articleId: route.params.slug })
+    },
+    {deep: true, immediate: true})
 </script>
 
 <template >

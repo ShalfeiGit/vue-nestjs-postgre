@@ -1,103 +1,21 @@
-﻿<template >
-  <div class="signin">
-		<a-typography-title class="signin__text">Sign In</a-typography-title>
-		<!-- <NavLink to={'/signup'} className={'signin__link-title'}>
-			Need an account?
-		</NavLink>
-		<Form
-			form={form}
-			name="signin"
-			{...formItemLayout}
-			initialValues={{ remember: true }}
-			onFinish={handleSubmitForm}
-			autoComplete="off"
-		>
-			<Form.Item 
-				hasFeedback
-				label="Username" 
-				name="username" 
-				validateDebounce={1000}
-				rules={[{ required: true, validator:handleUsernameValidator }]}
-			>
-				<Input placeholder="Input username" />
-			</Form.Item>
+﻿<script setup lang="ts">
+import { INotificationAction } from '@app/store/modules/userInfo';
+import { Form } from 'ant-design-vue';
+import { computed, reactive, UnwrapRef } from 'vue';
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-			<Form.Item 
-				hasFeedback
-				label="Pass" 
-				name="pass" 
-				validateDebounce={1000}
-				rules={[{ required: true, validator: handlePasswordValidator }]}
-			>
-				<Input.Password placeholder="Input password" autoComplete='on'/>
-			</Form.Item>
-
-			<Form.Item 
-				hasFeedback
-				name="remember" 
-				label="Remember me" 
-				valuePropName="checked"
-			>
-				<Checkbox/>
-			</Form.Item>
-
-			<Form.Item {...tailFormItemLayout}>
-				<Button type="primary" htmlType="submit">
-					Submit
-				</Button>
-			</Form.Item>
-		</Form> -->
-	</div>
-</template>
-
-<script setup lang="ts">
-
-</script>
-
-<style lang="scss">
-	@import '@app/app.scss';
-
-	.signin{
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		& form {
-			width: 100%;
-			max-width: 800px;
-		}
-		&__link-title{
-			color: $blue-color;
-			text-decoration: none;
-			font-size: 16px;
-		}
-	}
-</style>
-
-
-<!-- import React from 'react'
-import { NavLink, useNavigate, useOutletContext } from 'react-router-dom'
-import { Form, Input, Button, Typography, Checkbox } from 'antd'
-
-
-import '@app/pages/signIn/signIn.scss'
-import { useAppDispatch } from '@app/store/store'
-import { signInAction } from '@app/store/slices/userInfo'
-
-const { Title } = Typography
-
-const formItemLayout = {
-	labelCol: {
-		xs: { span: 24 },
-		sm: { span: 4 }
-	},
-	wrapperCol: {
-		xs: { span: 24 },
-		sm: { span: 16 }
-	}
+interface FormState {
+	username: string;
+	pass: string;
+	remember: boolean;
 }
 
-const tailFormItemLayout = {
-	wrapperCol: {
+interface IProps{
+	openNotification: INotificationAction['openNotification'];
+}
+
+const tailWrapperCol = {
 		xs: {
 			span: 24,
 			offset: 0
@@ -107,19 +25,24 @@ const tailFormItemLayout = {
 			offset: 4
 		}
 	}
-}
 
-const Signin: React.FC = () => {
-	const dispatch = useAppDispatch()
-	const navigate = useNavigate()
-	const [form] = Form.useForm()
-	const openNotification = useOutletContext()
-	const handleSubmitForm = () => {
-		form.validateFields().then((values) => {
-			const {...data} = values
-			dispatch(signInAction({...data, openNotification, navigate }))
-		})
+const labelCol = {
+		xs: { span: 24 },
+		sm: { span: 4 }
 	}
+	const wrapperCol = {
+		xs: { span: 24 },
+		sm: { span: 16 }
+	}
+	const modelRef: UnwrapRef<FormState> = reactive({
+		username: '',
+		pass: '',
+		remember: true,
+	});
+
+	const props = defineProps<IProps>()
+	const store = useStore()
+	const router = useRouter()
 
 	const handleUsernameValidator = (rule: { required: boolean }, value: string) => {
 		if(rule?.required && (!value || !value.trim())){
@@ -147,57 +70,101 @@ const Signin: React.FC = () => {
 		return Promise.resolve()
 	}
 
-	return (
-		<div className="signin">
-			<Title className={'signin__text'}>Sign In</Title>
-			<NavLink to={'/signup'} className={'signin__link-title'}>
-				Need an account?
-			</NavLink>
-			<Form
-				form={form}
-				name="signin"
-				{...formItemLayout}
-				initialValues={{ remember: true }}
-				onFinish={handleSubmitForm}
-				autoComplete="off"
+	const rulesRef = reactive({	
+		username: [{ required: true, validator: handleUsernameValidator }],	
+		pass:[{ required: true, validator: handlePasswordValidator }], 
+	});
+
+	const useForm = Form.useForm;
+	const { validate, validateInfos } = useForm(modelRef, rulesRef);
+
+	const usernameError = computed(() => {
+		return validateInfos['username'];
+	});
+	const passError = computed(() => {
+		return validateInfos['pass'];
+	});
+	const handleSubmitForm = () => {
+		validate().then((values) => {
+			store.dispatch('userInfo/signInAction', {
+				username: modelRef?.username,
+				pass: modelRef?.pass,
+				remember: modelRef?.remember,
+				navigate: router.push,
+				openNotification: props.openNotification
+			})
+		})
+		.catch(err => {
+			console.log('error', err);
+			console.log(validateInfos)
+		});
+	}
+</script>
+
+<template >
+  <div class="signin">
+		<a-typography-title class='signin__text'>Sign In</a-typography-title>
+		<router-link class="signin__link-title" :to="{ name: 'signUp' }">
+			Need an account?
+		</router-link>
+		<a-form 
+				:labelCol="labelCol"
+				:wrapperCol="wrapperCol"
 			>
-				<Form.Item 
-					hasFeedback
+			<a-form-item 
 					label="Username" 
-					name="username" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator:handleUsernameValidator }]}
+					name="username"
+					:validate-status="usernameError.validateStatus" 
+					:help="usernameError.help"
 				>
-					<Input placeholder="Input username" />
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
-					label="Pass" 
-					name="pass" 
-					validateDebounce={1000}
-					rules={[{ required: true, validator: handlePasswordValidator }]}
+					<a-input 
+						placeholder="Input username"
+						v-model:value="modelRef.username"  
+					>
+					</a-input>
+				</a-form-item>
+				<a-form-item 
+					label="Password" 
+					name="pass"
+					:validate-status="passError.validateStatus" 
+					:help="passError.help"
 				>
-					<Input.Password placeholder="Input password" autoComplete='on'/>
-				</Form.Item>
-
-				<Form.Item 
-					hasFeedback
-					name="remember" 
+					<a-input
+						placeholder="Input password"
+						v-model:value="modelRef.pass"  
+					>
+					</a-input>
+				</a-form-item>
+				<a-form-item 
 					label="Remember me" 
-					valuePropName="checked"
+					name="remember"
 				>
-					<Checkbox/>
-				</Form.Item>
+					<a-checkbox v-model:checked="modelRef.remember"></a-checkbox>
+				</a-form-item>
+				<a-form-item :wrapperCol="tailWrapperCol" >
+					<a-button type="primary"  @click="handleSubmitForm" >
+						Сохранить
+					</a-button>
+				</a-form-item>
+		</a-form>
+	</div>
+</template>
 
-				<Form.Item {...tailFormItemLayout}>
-					<Button type="primary" htmlType="submit">
-						Submit
-					</Button>
-				</Form.Item>
-			</Form>
-		</div>
-	)
-}
+<style lang="scss">
+	@import '@app/app.scss';
 
-export default Signin -->
+	.signin{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		& form {
+			width: 100%;
+			max-width: 800px;
+		}
+		&__link-title{
+			color: $blue-color;
+			text-decoration: none;
+			font-size: 16px;
+		}
+	}
+</style>

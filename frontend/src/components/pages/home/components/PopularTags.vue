@@ -62,6 +62,9 @@
 		margin-right: 40px;
 		border-radius: 20px;
 		margin-top: 20px;
+		& h4{
+			padding-top: 20px;
+		}
 		&__header{
 			display: flex;
 			margin-left: 25px;
